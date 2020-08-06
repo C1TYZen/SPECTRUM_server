@@ -1,3 +1,5 @@
+#define F_CPU 16000000
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdlib.h>
@@ -28,9 +30,9 @@ void USART_init() {
 
 // очистка буфера
 void USART_flush() {
-  while (!(UCSR0A&(1<<UDRE0))) {
-    int dummy = UDR0;
-  }
+	while (!(UCSR0A&(1<<UDRE0))) {
+		int dummy = UDR0;
+	}
 }
 /********************************************************
  * 1. Функция приема данных по USART (из регистра-буфера)
@@ -44,33 +46,33 @@ uint8_t USART_get() {
 }
 
 uint16_t USART_getnow() {
-  uint16_t cmd = 0;
-  cmd = UDR0;
-  cmd += (UDR0<<8);
-  return cmd;
+	uint16_t cmd = 0;
+	cmd = UDR0;
+	cmd += (UDR0<<8);
+	return cmd;
 }
 
 // Функция приема 2 байт данных
 uint16_t USART_get2bytes() {
-  uint16_t cmd = 0;
-  while (!(UCSR0A&(1<<RXC0))) {}
-  cmd = UDR0;
-  while (!(UCSR0A&(1<<RXC0))) {}
-  cmd += (UDR0<<8);
-  return cmd;
+	uint16_t cmd = 0;
+	while (!(UCSR0A&(1<<RXC0))) {}
+	cmd = UDR0;
+	while (!(UCSR0A&(1<<RXC0))) {}
+	cmd += (UDR0<<8);
+	return cmd;
 }
 
 long USART_get3bytes() {
-  long cmd = 0;
-  while (!(UCSR0A&(1<<RXC0))) {}
-  cmd = UDR0;
-  cmd = (cmd<<8);
-  while (!(UCSR0A&(1<<RXC0))) {}
-  cmd += UDR0;
-  cmd = (cmd<<8);
-  while (!(UCSR0A&(1<<RXC0))) {}
-  cmd += UDR0;
-  return cmd;
+	long cmd = 0;
+	while (!(UCSR0A&(1<<RXC0))) {}
+	cmd = UDR0;
+	cmd = (cmd<<8);
+	while (!(UCSR0A&(1<<RXC0))) {}
+	cmd += UDR0;
+	cmd = (cmd<<8);
+	while (!(UCSR0A&(1<<RXC0))) {}
+	cmd += UDR0;
+	return cmd;
 }
 
 /********************************************************
@@ -87,10 +89,10 @@ void USART_send(uint8_t data) {
 
 // Функция отправки 2 байт данных
 void USART_send2bytes(uint16_t data) {
-  while (!(UCSR0A&(1<<UDRE0))) {}
-  UDR0 = data;
-  while (!(UCSR0A&(1<<UDRE0))) {}
-  UDR0 = data>>8;
+	while (!(UCSR0A&(1<<UDRE0))) {}
+	UDR0 = data;
+	while (!(UCSR0A&(1<<UDRE0))) {}
+	UDR0 = data>>8;
 }
 
 /********************************************************
@@ -103,8 +105,8 @@ void USART_println(char* string) {
 		USART_send(*string);
 		string++;
 	}
-  USART_send('\r');
-  USART_send('\n');
+	USART_send('\r');
+	USART_send('\n');
 }
 
 /********************************************************
@@ -112,12 +114,12 @@ void USART_println(char* string) {
  * в двоичном представлении.
  ********************************************************/
 void USART_putbyteview(uint8_t data) {
-  uint8_t cur = 8;
-  while(cur!=0) {
-    cur--;
-    if((data>>cur) & 1) USART_send('1');
-    if(!((data>>cur) & 1)) USART_send('0');
-  }
+	uint8_t cur = 8;
+	while(cur!=0) {
+	cur--;
+	if((data>>cur) & 1) USART_send('1');
+	if(!((data>>cur) & 1)) USART_send('0');
+	}
 }
 
 /***********************
@@ -131,10 +133,10 @@ void USART_putbyteview(uint8_t data) {
  * 16000000/128 = 125000
  *********************************************************/
 void ADC_init() {
-    ADMUX &= ~(1<<REFS0);
-    ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
-    DDRC &= ~(1<<PC0);
-    PORTC |= (1<<PC0);
+	ADMUX &= ~(1<<REFS0);
+	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
+	DDRC &= ~(1<<PC0);
+	PORTC |= (1<<PC0);
 }
 
 /*********************************************************
@@ -147,12 +149,12 @@ void ADC_init() {
  * 7. Возвращаем 10-битный результат измерения.
  *********************************************************/
 uint16_t ADC_read(uint8_t ch) {
-  ch &= 0b00000111;
-  ADMUX = (ADMUX & 0xF8) | ch;
-  ADCSRA |= (1<<ADSC);
-  while(ADCSRA & (1<<ADSC));
+	ch &= 0b00000111;
+	ADMUX = (ADMUX & 0xF8) | ch;
+	ADCSRA |= (1<<ADSC);
+	while(ADCSRA & (1<<ADSC));
  
-  return (ADC);
+	return (ADC);
 }
 
 /***********************
@@ -166,8 +168,8 @@ uint16_t ADC_read(uint8_t ch) {
  * 2. Задаем делитель частоты 1024 и запускаем таймер
  ********************************************************/
 void TIMER_init() {
-  TIMSK0 |= (1<<TOIE0);
-  TCCR0B |= (1<<CS02) | (1<<CS00);
+	TIMSK0 |= (1<<TOIE0);
+	TCCR0B |= (1<<CS02) | (1<<CS00);
 }
 
 /***********************
@@ -179,17 +181,17 @@ void TIMER_init() {
 #define DIR   PD3
  
 void DRIVER_init() {
-  DRIVER_DDR |= (1<<STEP)|(1<<DIR);
-  DRIVER_PORT |= (1<<STEP);
-  DRIVER_PORT |= (1<<DIR);
+	DRIVER_DDR |= (1<<STEP)|(1<<DIR);
+	DRIVER_PORT |= (1<<STEP);
+	DRIVER_PORT |= (1<<DIR);
 }
 
 void DRIVER_step() {
-  DRIVER_PORT ^= (1<<STEP);
+	DRIVER_PORT ^= (1<<STEP);
 }
 
 void DRIVER_chdir() {
-  DRIVER_PORT ^= (1<<DIR);
+	DRIVER_PORT ^= (1<<DIR);
 }
 
 /***********************
@@ -197,83 +199,83 @@ void DRIVER_chdir() {
  ***********************/
 
 void conf(uint16_t var, uint16_t def) {
-  var = def;
+	var = def;
 }
 
 int main() {
-  // Зааааапущаем все нужные библиотеки
-  USART_init();
-  ADC_init();
-  // TIMER_init();
-  DRIVER_init();
+	// Зааааапущаем все нужные библиотеки
+	USART_init();
+	ADC_init();
+	// TIMER_init();
+	DRIVER_init();
 
-  uint16_t command;
+	uint16_t command;
 
-  long mesureRange0;
-  long mesureRange1;
-  uint16_t mesureCount;
-  long stepCount = 100;
+	long mesureRange0;
+	long mesureRange1;
+	uint16_t mesureCount;
+	long stepCount = 100;
 
-  // USART_println("ArADC v0.6a");
-  
-  while(1) {
-    command = USART_get2bytes();
+	// USART_println("ArADC v0.6a");
+	
+	while(1) {
+	command = USART_get2bytes();
 
-    // bm - 28002
-    if(command == 28002) {
-      _delay_ms(50);
-      USART_flush();
-      uint16_t mes = 0;
-      long i = stepCount;
-      while(i > 0) {
-        mes = ADC_read(0);
-        USART_send2bytes(mes);
-        DRIVER_step();
-        i--;
-        // 1.6 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
-        _delay_ms(1.4);
-        // ... и теперь это нахер не нужно.
-      }
-      // sm - 28019 - stops reciever
-      USART_send2bytes(28019);
-    }
+	// bm - 28002
+	if(command == 28002) {
+		_delay_ms(50);
+		USART_flush();
+		uint16_t mes = 0;
+		long i = stepCount;
+		while(i > 0) {
+		mes = ADC_read(0);
+		USART_send2bytes(mes);
+		DRIVER_step();
+		i--;
+		// 1.6 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
+		_delay_ms(1.4);
+		// ... и теперь это нахер не нужно.
+		}
+		// sm - 28019 - stops reciever
+		USART_send2bytes(28019);
+	}
 
-    // mr - 29293
-    if(command == 29293) {
-      mesureRange0 = USART_get3bytes();
-      mesureRange1 = USART_get3bytes();
-      stepCount = mesureRange1 - mesureRange0;
-      USART_println("mr SET");
-    }
+	// mr - 29293
+	if(command == 29293) {
+		mesureRange0 = USART_get3bytes();
+		mesureRange1 = USART_get3bytes();
+		stepCount = mesureRange1 - mesureRange0;
+		USART_println("mr SET");
+	}
 
-    // st - 29811
-    if(command == 29811) {
-      stepCount = USART_get2bytes();
-      USART_println("st SET");
-    }
+	// st - 29811
+	if(command == 29811) {
+		stepCount = USART_get2bytes();
+		USART_println("st SET");
+	}
 
-    // mc - 25453
-    if(command == 25453) {
-      mesureCount = USART_get2bytes();
-      USART_println("mc SET");
-    }
+	// mc - 25453
+	if(command == 25453) {
+		mesureCount = USART_get2bytes();
+		USART_println("mc SET");
+	}
 
-    // cc - 25443
-    if(command == 25443) {
-      //USART_println("OLD WORLD NEWS");
-      USART_println("**Connected**");
-    }
+	// cc - 25443
+	if(command == 25443) {
+		//USART_println("OLD WORLD NEWS");
+		USART_println("**Connected**");
+	}
 
-    // ds - 29540
-    if(command == 29540) {
-      DRIVER_step();
-    }
+	// ds - 29540
+	if(command == 29540) {
+		DRIVER_step();
+	}
 
-    // dd - 25700
-    if(command == 25700) {
-      DRIVER_chdir();
-    }
-  }
-  
-  return 0;
+	// dd - 25700
+	if(command == 25700) {
+		DRIVER_chdir();
+	}
+	}
+	
+	return 0;
 }
