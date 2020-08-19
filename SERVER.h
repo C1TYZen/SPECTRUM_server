@@ -33,8 +33,3 @@ uint16_t ADC_read(uint8_t ch);
 void DRIVER_init();
 void DRIVER_step();
 void DRIVER_chdir();
-
-/***********************
- * TIMER
- ***********************/
-void TIMER_init();

@@ -4,16 +4,11 @@
  * MAIN
  ***********************/
 
-void conf(uint16_t var, uint16_t def) {
-	var = def;
-}
-
 int main() {
 	// Зааааапущаем все нужные библиотеки
 	USART_init();
 	ADC_init();
 	DRIVER_init();
-	// TIMER_init();
 
 	uint16_t command;
 
@@ -84,6 +79,6 @@ int main() {
 			DRIVER_chdir();
 		}
 	}
-	
+
 	return 0;
 }
