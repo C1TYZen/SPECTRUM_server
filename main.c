@@ -1,8 +1,7 @@
-#include "SERVER.h"
-
 /***********************
  * MAIN
  ***********************/
+#include "SERVER.h"
 
 int main() {
 	// Зааааапущаем все нужные библиотеки
@@ -10,7 +9,7 @@ int main() {
 	ADC_init();
 	DRIVER_init();
 
-	uint16_t command;
+	uint16_t command = 0;
 
 	long mesureRange0;
 	long mesureRange1;
@@ -20,7 +19,7 @@ int main() {
 	// USART_println("ArADC v0.6a");
 	
 	while(1) {
-		command = USART_get2bytes();
+		command = USART_getcommand();
 
 		// bm - 28002
 		if(command == 28002) {
@@ -28,17 +27,21 @@ int main() {
 			USART_flush();
 			uint16_t mes = 0;
 			long i = stepCount;
+
 			while(i > 0) {
 				mes = ADC_read(0);
-				USART_send2bytes(mes);
+				USART_sendoncomp(mes);
 				DRIVER_step();
 				i--;
 				// 1.6 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
 				_delay_ms(1.4);
 				// ... и теперь это нахер не нужно.
+				// теперь это все нахер не нужно
+				// нужно подавать импульсы через определенные
+				// промежутки времени
 			}
 			// sm - 28019 - stops reciever
-			USART_send2bytes(28019);
+			USART_sendoncomp(28019);
 		}
 
 		// mr - 29293
@@ -65,19 +68,30 @@ int main() {
 		if(command == 25443) {
 			//USART_println("OLD WORLD NEWS");
 			USART_println("**Connected**");
+			command = 0;
 		}
 
 		//DRIVER
 
 		// ds - 29540
 		if(command == 29540) {
-			DRIVER_step();
+			while (stepCount >= 0) {
+				DRIVER_step();
+				stepCount--;
+				_delay_ms(2);
+			}
 		}
 
 		// dd - 25700
 		if(command == 25700) {
 			DRIVER_chdir();
 		}
+		// dv - 30308
+		if(command == 30308) {
+			DRIVER_stepdiv(USART_get());
+		}
+		USART_flush();
+		command = 0;
 	}
 
 	return 0;

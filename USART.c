@@ -1,8 +1,8 @@
-#include "SERVER.h"
-
 /***********************
  * USART
  ***********************/
+#include "SERVER.h"
+
 // Скорость обмена данными по USART в бит/с
 // 76800 подобрано по таблице
 #define BAUDRATE 76800
@@ -19,15 +19,18 @@
 void USART_init() {
 	UBRR0H = (uint8_t)(BAUD_PRESCALLER>>8);
 	UBRR0L = (uint8_t)BAUD_PRESCALLER;
+	//UCSR A
+
+	//UCSR B
 	UCSR0B = (1<<RXEN0) | (1<<TXEN0) | (1<<RXCIE0);
+	//UCSR C
 	UCSR0C = (1<<UCSZ00) | (1<<UCSZ01);
 }
 
-// очистка буфера
+// Очистка буфера - включение и выключение рессивера
 void USART_flush() {
-	while (!(UCSR0A&(1<<UDRE0))) {
-		int dummy = UDR0;
-	}
+	UCSR0B &= ~(1<<RXEN0);
+	UCSR0B |= (1<<RXEN0);
 }
 /********************************************************
  * 1. Функция приема данных по USART (из регистра-буфера)
@@ -49,6 +52,15 @@ uint16_t USART_getnow() {
 
 // Функция приема 2 байт данных
 uint16_t USART_get2bytes() {
+	uint16_t cmd = 0;
+	while (!(UCSR0A&(1<<RXC0))) {}
+	cmd = UDR0;
+	while (!(UCSR0A&(1<<RXC0))) {}
+	cmd += (UDR0<<8);
+	return cmd;
+}
+
+uint16_t USART_getcommand() {
 	uint16_t cmd = 0;
 	while (!(UCSR0A&(1<<RXC0))) {}
 	cmd = UDR0;
@@ -90,6 +102,13 @@ void USART_send2bytes(uint16_t data) {
 	UDR0 = data>>8;
 }
 
+void USART_sendoncomp(uint16_t data) {
+	while (!(UCSR0A&(1<<UDRE0))) {}
+	UDR0 = data;
+	while (!(UCSR0A&(1<<UDRE0))) {}
+	UDR0 = data>>8;
+}
+
 /********************************************************
  * Функция отправки строки через USART.
  * Входной аргумент - указатель на строку string.
@@ -111,8 +130,8 @@ void USART_println(char* string) {
 void USART_putbyteview(uint8_t data) {
 	uint8_t cur = 8;
 	while(cur!=0) {
-	cur--;
-	if((data>>cur) & 1) USART_send('1');
-	if(!((data>>cur) & 1)) USART_send('0');
+		cur--;
+		if((data>>cur) & 1) USART_send('1');
+		if(!((data>>cur) & 1)) USART_send('0');
 	}
 }

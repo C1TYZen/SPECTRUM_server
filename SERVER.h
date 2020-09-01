@@ -33,3 +33,4 @@ uint16_t ADC_read(uint8_t ch);
 void DRIVER_init();
 void DRIVER_step();
 void DRIVER_chdir();
+void DRIVER_stepdiv(uint8_t div);
