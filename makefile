@@ -4,7 +4,7 @@ GCCDEVICE=	atmega168p
 ADDEVICE = m168
 F_CPU = 16000000 # in Hz
 
-OBJECTS = main.o USART.o DRIVER.o ADC.o
+OBJECTS = main.o USART.o DRIVER.o ADC.o PORTB.o
 
 DEBUGCOMPILE = avr-gcc -Wall -Os -g -DF_CPU=$(F_CPU) -mmcu=$(GCCDEVICE)
 COMPILE = avr-gcc -Os -DF_CPU=$(F_CPU) -mmcu=$(GCCDEVICE)
@@ -27,51 +27,57 @@ help:
 #.o
 
 main.o: main.c
-	@echo "main.c--------------------------"
+	@echo "---main.c--------------------------"
 	$(COMPILE) -c main.c
 
 USART.o: USART.c
-	@echo "USART.c-------------------------"
+	@echo "---USART.c-------------------------"
 	$(COMPILE) -c USART.c
 
 DRIVER.o: DRIVER.c
-	@echo "DRIVER.c------------------------"
+	@echo "---DRIVER.c------------------------"
 	$(COMPILE) -c DRIVER.c
 
 ADC.o: ADC.c
-	@echo "ADC.c---------------------------"
+	@echo "---ADC.c---------------------------"
 	$(COMPILE) -c ADC.c
+
+PORTB.o: PORTB.c
+	@echo "---PORTB.c---------------------------"
+	$(COMPILE) -c PORTB.c
 
 #.dmp
 
 main.dmp: main.o
-	@echo "main dump-----------------------"
+	@echo "---main dump-----------------------"
 	avr-objdump -d main.o > dump/main.dmp
 
 USART.dmp: USART.o
-	@echo "USART dump----------------------"
+	@echo "---USART dump----------------------"
 	avr-objdump -d USART.o > dump/USART.dmp
 
 DRIVER.dmp: DRIVER.o
-	@echo "DRIVER dump---------------------"
+	@echo "---DRIVER dump---------------------"
 	avr-objdump -d DRIVER.o > dump/DRIVER.dmp
 
 ADC.dmp: ADC.o
-	@echo "ADC dump------------------------"
+	@echo "---ADC dump------------------------"
 	avr-objdump -d ADC.o > dump/ADC.dmp
+
+PORTB.dmp: PORTB.o
+	@echo "---PORTB dump----------------------"
+	avr-objdump -d PORTB.o > dump/ADC.dmp
 
 #.hex .elf
 
 main.elf: $(OBJECTS)
-	@echo ".elf files----------------------"
+	@echo "---.elf files----------------------"
 	$(COMPILE) -o main.elf $(OBJECTS)
 
 main.hex: main.elf
-	@echo ".hex files----------------------"
+	@echo "---.hex files----------------------"
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	@echo "--------------------------------"
 	avr-size -C --mcu=$(GCCDEVICE) main.elf
-	@echo "--------------------------------"
 
 #-------------
 #commands-----

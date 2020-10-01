@@ -3,8 +3,9 @@
  ***********************/
 #include "SERVER.h"
 
+#define F_CPU 16000000
 // Скорость обмена данными по USART в бит/с
-// 76800 подобрано по таблице
+// 76800 подобрано по таблице /papers/AVR Baud Rate Tables.htm
 #define BAUDRATE 76800
 // Значение регистра UBRR0, соответствующее выбранной скорости
 #define BAUD_PRESCALLER (((F_CPU / (BAUDRATE * 16UL))) - 1)
@@ -22,16 +23,17 @@ void USART_init() {
 	//UCSR A
 
 	//UCSR B
-	UCSR0B = (1<<RXEN0) | (1<<TXEN0) | (1<<RXCIE0);
+	UCSR0B = (1<<RXCIE0) | (1<<TXEN0) | (1<<RXEN0);
 	//UCSR C
-	UCSR0C = (1<<UCSZ00) | (1<<UCSZ01);
+	UCSR0C = (1<<UCSZ01) | (1<<UCSZ00);
 }
 
-// Очистка буфера - включение и выключение рессивера
+// Очистка буфера (выключение и включение рессивера)
 void USART_flush() {
 	UCSR0B &= ~(1<<RXEN0);
 	UCSR0B |= (1<<RXEN0);
 }
+
 /********************************************************
  * 1. Функция приема данных по USART (из регистра-буфера)
  * 2. Ждем "наполнения" регистра буфера-приемника...
@@ -43,7 +45,7 @@ uint8_t USART_get() {
 	return UDR0;
 }
 
-uint16_t USART_getnow() {
+uint16_t USART_getmessage() {
 	uint16_t cmd = 0;
 	cmd = UDR0;
 	cmd += (UDR0<<8);
@@ -60,6 +62,7 @@ uint16_t USART_get2bytes() {
 	return cmd;
 }
 
+// Псевдоним функции приема 2х байт
 uint16_t USART_getcommand() {
 	uint16_t cmd = 0;
 	while (!(UCSR0A&(1<<RXC0))) {}
@@ -102,6 +105,7 @@ void USART_send2bytes(uint16_t data) {
 	UDR0 = data>>8;
 }
 
+// Псевдоним функции отправки 2х байт
 void USART_sendoncomp(uint16_t data) {
 	while (!(UCSR0A&(1<<UDRE0))) {}
 	UDR0 = data;
@@ -121,6 +125,14 @@ void USART_println(char* string) {
 	}
 	USART_send('\r');
 	USART_send('\n');
+}
+
+void USART_print(char* string) {
+	while (*string != 0) {
+		USART_send(*string);
+		string++;
+	}
+	USART_send('\r');
 }
 
 /********************************************************
