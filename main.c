@@ -3,6 +3,45 @@
  ***********************/
 #include "SERVER.h"
 
+void move(long steps)
+{
+	_delay_ms(50);
+	USART_flush();
+	uint16_t msg = 0;
+
+	while(steps > 0) {
+		msg = USART_getmessage();
+		if(msg == CMD_DI)
+			break;
+		DRIVER_step();
+		steps--;
+		_delay_ms(1.4);
+		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
+	}
+	USART_sendoncomp(CMD_MS);
+}
+
+void mesure(long steps)
+{
+	_delay_ms(50);
+	USART_flush();
+	uint16_t mesure = 0;
+	uint16_t msg = 0;
+
+	while(steps > 0) {
+		msg = USART_getmessage();
+		if(msg == CMD_DI)
+			break;
+		mesure = ADC_read(0);
+		USART_sendoncomp(mesure);
+		DRIVER_step();
+		steps--;
+		_delay_ms(1.4);
+		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
+	}
+	USART_sendoncomp(CMD_MS);
+}
+
 int main() {
 	// Зааааапущаем все нужные библиотеки
 	USART_init();
@@ -23,94 +62,67 @@ int main() {
 		USART_flush();
 		command = USART_getcommand();
 
+		//MESURE
 		if(command == CMD_MB)
 		{
-			_delay_ms(50);
-			USART_flush();
-			uint16_t mesure = 0;
-			long steps = stepCount;
 			DRIVER_backward();
-
-			while(steps > 0) {
-				mesure = USART_getmessage();
-				if(mesure == CMD_DI) // di
-					break;
-				mesure = ADC_read(0);
-				USART_sendoncomp(mesure);
-				DRIVER_step();
-				steps--;
-				// 1.6 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
-				_delay_ms(1.4);
-				// ... и теперь это нахер не нужно.
-				// теперь это все нахер не нужно
-				// нужно подавать импульсы через определенные
-				// промежутки времени
-			}
-			// sm - 28019 - stops reciever
-			USART_sendoncomp(CMD_MS);
+			mesure(stepCount);
 		}
-		// mr - 29293
+
 		if(command == CMD_MR)
 		{
 			mesureRange0 = USART_get3bytes();
 			mesureRange1 = USART_get3bytes();
 			stepCount = mesureRange1 - mesureRange0;
-			USART_println("mr SET");
+			USART_println("range SET");
 		}
-		// st - 29811
-		if(command == CMD_ST)
-		{
-			stepCount = USART_get2bytes();
-			USART_println("st SET");
-		}
-		// mc - 25453
+
 		if(command == CMD_MC)
 		{
 			mesureCount = USART_get2bytes();
-			USART_println("mc SET");
+			USART_println("mps SET");
 		}
-		// cc - 25443
-		if(command == CMD_CC)
+
+		if(command == CMD_MF)
 		{
-			//USART_println("OLD WORLD NEWS");
-			USART_println("**Connected**");
-			command = 0;
+			char str[50];
+			USART_flush();
+			USART_readln(str);
+			USART_println(str);
+
 		}
 
 		//DRIVER
-
-		// ds - 29540
 		if(command == CMD_DS) 
 		{
-			DRIVER_move(stepCount);
+			DRIVER_step(stepCount);
 		}
-		// dd - 25700
+
 		if(command == CMD_DD)
 		{
 			DRIVER_chdir();
 		}
-		// dv - 30308
+
 		if(command == CMD_DV)
 		{
-			DRIVER_stepdiv(USART_get());
+			uint8_t temp = (uint8_t)USART_get2bytes();
+			DRIVER_stepdiv(temp);
+			USART_println("divider SET");
 		}
-		// df - 26212
+
 		if(command == CMD_DF)
 		{
 			DRIVER_forward();
 			USART_println("forward");
-			DRIVER_move(stepCount);
 		}
-		// db - 25188
+
 		if(command == CMD_DB)
 		{
 			DRIVER_backward();
 			USART_println("backward");
-			DRIVER_move(stepCount);
 		}
 
 		//TEST
-		//tp
 		if(command == CMD_TP)
 		{
 			if(PORTB_getpin(D8))
@@ -145,6 +157,20 @@ int main() {
 				DRIVER_step();
 			}
 			USART_println("CALLIBRATED");
+		}
+
+		//OTHER
+		if(command == CMD_ST)
+		{
+			stepCount = USART_get2bytes();
+			USART_println("steps SET");
+		}
+
+		if(command == CMD_CC)
+		{
+			//USART_println("OLD WORLD NEWS");
+			USART_println("**Connected**");
+			command = 0;
 		}
 
 		command = 0;
