@@ -10,6 +10,9 @@
 #define STEP 	PD6
 #define DIR 	PD7
  
+ /*
+  * Инициализация библиотеки двигателя
+  */
 void DRIVER_init()
 {
 	DDRD |= (1<<EN)|(1<<MS1)|(1<<MS2)|(1<<MS3)|(1<<STEP)|(1<<DIR);
@@ -18,26 +21,31 @@ void DRIVER_init()
 	PORTD |= (1<<MS1);
 }
 
+// Шаг двигателя
 void DRIVER_step()
 {
 	PORTD ^= (1<<STEP);
 }
 
+// Смена направления на противоположное
 void DRIVER_chdir()
 {
 	PORTD ^= (1<<DIR);
 }
 
+// Направление двигателя вперед
 void DRIVER_forward()
 {
 	PORTD |= (1<<DIR);
 }
 
+// Направление двигателя назад
 void DRIVER_backward()
 {
 	PORTD &= ~(1<<DIR);
 }
 
+// Установка делителя шага
 void DRIVER_stepdiv(uint8_t div)
 {
 	// 0    1    2    3

@@ -9,7 +9,8 @@ void move(long steps)
 	USART_flush();
 	uint16_t msg = 0;
 
-	while(steps > 0) {
+	while(steps > 0)
+	{
 		msg = USART_getmessage();
 		if(msg == CMD_DI)
 			break;
@@ -28,7 +29,8 @@ void mesure(long steps)
 	uint16_t mesure = 0;
 	uint16_t msg = 0;
 
-	while(steps > 0) {
+	while(steps > 0)
+	{
 		msg = USART_getmessage();
 		if(msg == CMD_DI)
 			break;
@@ -59,13 +61,17 @@ int main() {
 		// Очистка буфера должна быть здесь
 		// При вызове очистки буфера из другого места
 		// в клиент перестают приходить сообщения сервера
-		USART_flush();
 		command = USART_getcommand();
 
 		//MESURE
 		if(command == CMD_MB)
 		{
 			DRIVER_backward();
+			mesure(stepCount);
+		}
+
+		if(command == CMD_MF)
+		{
 			mesure(stepCount);
 		}
 
@@ -81,15 +87,6 @@ int main() {
 		{
 			mesureCount = USART_get2bytes();
 			USART_println("mps SET");
-		}
-
-		if(command == CMD_MF)
-		{
-			char str[50];
-			USART_flush();
-			USART_readln(str);
-			USART_println(str);
-
 		}
 
 		//DRIVER
@@ -174,6 +171,7 @@ int main() {
 		}
 
 		command = 0;
+		USART_flush();
 	}
 
 	return 0;
