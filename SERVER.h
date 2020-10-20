@@ -13,11 +13,11 @@
 
 #define CMD_DB	25188 // движение двигателя назад
 #define CMD_DC	25444 // калибровка
-#define CMD_DD	25700 // изменить направление вращения драйвера
 #define CMD_DF	26212 // движение двигателя вперед
 #define CMD_DI	26980 // остановка двигателя
 #define CMD_DS	29540 // шаг двигателя
 #define CMD_DV	30308 // установка делителя шага
+#define CMD_DP  28772 // вывод информации о положении двигателя
 
 #define CMD_CC	25443 // проверить соединение
 #define CMD_ST	29811 // установка количества шагов
@@ -28,14 +28,14 @@
  ***********************/
 void USART_init();
 void USART_flush();
-uint8_t USART_get();
-uint16_t USART_getnow();
 
-uint16_t USART_get2bytes();
-long USART_get3bytes();
-void USART_send(uint8_t data);
-void USART_send2bytes(uint16_t data);
+uint8_t USART_read();
+long USART_get(uint8_t bytes);
+uint8_t USART_readnow();
+uint16_t USART_getmessage();
 
+void USART_write(uint8_t data);
+void USART_send(long data, uint8_t bytes);
 void USART_println(char* string);
 void USART_putbyteview(uint8_t data);
 
@@ -54,6 +54,8 @@ void DRIVER_chdir();
 void DRIVER_forward();
 void DRIVER_backward();
 void DRIVER_stepdiv(uint8_t div);
+void DRIVER_moveto(long r1);
+void DRIVER_info();
 
 /***********************
  * PORTB
@@ -65,3 +67,4 @@ void DRIVER_stepdiv(uint8_t div);
 #define D12		PB4
 
 void PORTB_init();
+uint8_t PORTB_getpin(int pin);

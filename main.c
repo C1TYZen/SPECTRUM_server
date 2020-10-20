@@ -3,45 +3,28 @@
  ***********************/
 #include "SERVER.h"
 
-void move(long steps)
-{
-	_delay_ms(50);
-	USART_flush();
-	uint16_t msg = 0;
+#define ENDER D8
+#define ROTOR D9
 
-	while(steps > 0)
-	{
-		msg = USART_getmessage();
-		if(msg == CMD_DI)
-			break;
-		DRIVER_step();
-		steps--;
-		_delay_ms(1.4);
-		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
-	}
-	USART_sendoncomp(CMD_MS);
-}
-
-void mesure(long steps)
+void mesure(long st)
 {
-	_delay_ms(50);
+	_delay_ms(2);
 	USART_flush();
 	uint16_t mesure = 0;
 	uint16_t msg = 0;
-
-	while(steps > 0)
+	for(;st > 0; st--)
 	{
 		msg = USART_getmessage();
 		if(msg == CMD_DI)
 			break;
 		mesure = ADC_read(0);
-		USART_sendoncomp(mesure);
+		USART_send(mesure, 2);
 		DRIVER_step();
-		steps--;
 		_delay_ms(1.4);
-		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
+		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутистами-аутсорсерами
 	}
-	USART_sendoncomp(CMD_MS);
+	USART_flush();
+	USART_send(CMD_MS, 2);
 }
 
 int main() {
@@ -52,57 +35,58 @@ int main() {
 	PORTB_init();
 
 	uint16_t command = 0;
-	long mesureRange0;
-	long mesureRange1;
-	uint16_t mesureCount;
-	long stepCount = 100;
+	long mesure_range0;
+	long mesure_range1;
+	long steps = 100;
+	float count_steps = 0;
+	uint16_t mesure_count;
+	long position;
 	
 	while(1) {
-		// Очистка буфера должна быть здесь
-		// При вызове очистки буфера из другого места
-		// в клиент перестают приходить сообщения сервера
-		command = USART_getcommand();
+		command = USART_get(2);
 
 		//MESURE
 		if(command == CMD_MB)
 		{
+			//DRIVER_moveto(mesure_range0);
 			DRIVER_backward();
-			mesure(stepCount);
+			mesure(steps);
 		}
 
 		if(command == CMD_MF)
 		{
-			mesure(stepCount);
+			mesure(steps);
 		}
 
 		if(command == CMD_MR)
 		{
-			mesureRange0 = USART_get3bytes();
-			mesureRange1 = USART_get3bytes();
-			stepCount = mesureRange1 - mesureRange0;
+			mesure_range0 = USART_get(3);
+			mesure_range1 = USART_get(3);
+			if(mesure_range1 < mesure_range0)
+			{
+				long buf = mesure_range0;
+				mesure_range0 = mesure_range1;
+				mesure_range1 = buf;
+			}
+			steps = mesure_range1 - mesure_range0;
 			USART_println("range SET");
 		}
 
 		if(command == CMD_MC)
 		{
-			mesureCount = USART_get2bytes();
+			mesure_count = USART_get(2);
 			USART_println("mps SET");
 		}
 
 		//DRIVER
 		if(command == CMD_DS) 
 		{
-			DRIVER_step(stepCount);
-		}
-
-		if(command == CMD_DD)
-		{
-			DRIVER_chdir();
+			DRIVER_step(steps);
 		}
 
 		if(command == CMD_DV)
 		{
-			uint8_t temp = (uint8_t)USART_get2bytes();
+			uint8_t temp = (uint8_t)USART_get(2);
 			DRIVER_stepdiv(temp);
 			USART_println("divider SET");
 		}
@@ -119,19 +103,6 @@ int main() {
 			USART_println("backward");
 		}
 
-		//TEST
-		if(command == CMD_TP)
-		{
-			if(PORTB_getpin(D8))
-				USART_println("Ender 1");
-			else
-				USART_println("Ender 0");
-			if(PORTB_getpin(D9))
-				USART_println("Rotor 1");
-			else
-				USART_println("Rotor 0");
-		}
-
 		if(command == CMD_DC) 
 		{
 			// Здесь задержками являются вызовы функции print.
@@ -139,27 +110,50 @@ int main() {
 			DRIVER_forward();	
 			DRIVER_stepdiv(1);
 			USART_println("Callibrating...");
-			while(PORTB_getpin(D8))
+			count_steps = 0;
+			while(PORTB_getpin(ENDER))
 			{
 				USART_print("Ender");
 				DRIVER_step();
+				count_steps++;
 			}
 			USART_println("END  ");
 
 			DRIVER_backward();
-			DRIVER_stepdiv(3);
-			while(PORTB_getpin(D9))
+			DRIVER_stepdiv(8);
+			while(PORTB_getpin(ROTOR))
 			{
 				USART_print("Rotor");
 				DRIVER_step();
+				count_steps -= 1.0/8.0;
 			}
 			USART_println("CALLIBRATED");
+			USART_send((long)count_steps, 3);
+			DRIVER_reset();
+		}
+
+		if(command == CMD_DP)
+		{
+			DRIVER_info();
+		}
+
+		//TEST
+		if(command == CMD_TP)
+		{
+			if(PORTB_getpin(ENDER))
+				USART_println("Ender 1");
+			else
+				USART_println("Ender 0");
+			if(PORTB_getpin(ROTOR))
+				USART_println("Rotor 1");
+			else
+				USART_println("Rotor 0");
 		}
 
 		//OTHER
 		if(command == CMD_ST)
 		{
-			stepCount = USART_get2bytes();
+			steps = USART_get(2);
 			USART_println("steps SET");
 		}
 
@@ -167,7 +161,6 @@ int main() {
 		{
 			//USART_println("OLD WORLD NEWS");
 			USART_println("**Connected**");
-			command = 0;
 		}
 
 		command = 0;
