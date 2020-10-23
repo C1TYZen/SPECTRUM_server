@@ -1,8 +1,8 @@
 #define __AVR_ATmega168P__
 #include <avr/io.h>
 #include <avr/interrupt.h>
-//#include <stdlib.h>
 #include <util/delay.h>
+#include <stdlib.h>
 
 // Команды
 #define CMD_MB	25197 // начать измерение
@@ -18,6 +18,8 @@
 #define CMD_DS	29540 // шаг двигателя
 #define CMD_DV	30308 // установка делителя шага
 #define CMD_DP  28772 // вывод информации о положении двигателя
+#define CMD_DM  28004 // передвинуть двигатель к указаной точке
+#define CMD_DD  25700 // установка направления
 
 #define CMD_CC	25443 // проверить соединение
 #define CMD_ST	29811 // установка количества шагов
@@ -33,10 +35,12 @@ uint8_t USART_read();
 long USART_get(uint8_t bytes);
 uint8_t USART_readnow();
 uint16_t USART_getmessage();
+void USART_readln(char* str);
 
 void USART_write(uint8_t data);
 void USART_send(long data, uint8_t bytes);
 void USART_println(char* string);
+void USART_print(char* string);
 void USART_putbyteview(uint8_t data);
 
 /***********************
@@ -53,7 +57,7 @@ void DRIVER_step();
 void DRIVER_chdir();
 void DRIVER_forward();
 void DRIVER_backward();
-void DRIVER_stepdiv(uint8_t div);
+uint8_t DRIVER_stepdiv(uint8_t div);
 void DRIVER_moveto(long r1);
 void DRIVER_info();
 

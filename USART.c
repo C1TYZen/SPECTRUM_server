@@ -48,12 +48,6 @@ uint8_t USART_read()
 	return UDR0;
 }
 
-// Чтение байта без ожидания заполнения буфера
-uint8_t USART_readnow()
-{
-	return UDR0;
-}
-
 // Чтение пакета байт
 long USART_get(uint8_t bytes)
 {
@@ -70,6 +64,12 @@ long USART_get(uint8_t bytes)
 	return cmd;
 }
 
+// Чтение байта без ожидания заполнения буфера
+uint8_t USART_readnow()
+{
+	return UDR0;
+}
+
 // Прием мнгновенного сообщения
 uint16_t USART_getmessage()
 {
@@ -79,44 +79,18 @@ uint16_t USART_getmessage()
 	return cmd;
 }
 
-/*************************************
-// Прием 2х байт
-uint16_t USART_get2bytes()
+// Чтение строки
+void USART_readln(char* str)
 {
-	uint16_t cmd = 0;
-	while (!(UCSR0A&(1<<RXC0))) {}
-	cmd = UDR0;
-	while (!(UCSR0A&(1<<RXC0))) {}
-	cmd += (UDR0<<8);
-	return cmd;
+	int i;
+	for(i = 0; i < 100; i++)
+	{
+		*str = USART_read();
+		if(*str == ';')
+			break;
+		str++;
+	}
 }
-
-// Псевдоним функции приема 2х байт
-uint16_t USART_getcommand()
-{
-	uint16_t cmd = 0;
-	while (!(UCSR0A&(1<<RXC0))) {}
-	cmd = UDR0;
-	while (!(UCSR0A&(1<<RXC0))) {}
-	cmd += (UDR0<<8);
-	return cmd;
-}
-
-// Прием 3х байт
-long USART_get3bytes()
-{
-	long cmd = 0;
-	while (!(UCSR0A&(1<<RXC0))) {}
-	cmd = UDR0;
-	cmd = (cmd<<8);
-	while (!(UCSR0A&(1<<RXC0))) {}
-	cmd += UDR0;
-	cmd = (cmd<<8);
-	while (!(UCSR0A&(1<<RXC0))) {}
-	cmd += UDR0;
-	return cmd;
-}
-*************************************/
 
 /*
  * Отправка 1 байта данных data по USART
@@ -168,19 +142,6 @@ void USART_print(char* string)
 	USART_write('\r');
 }
 
-// Чтение строки
-void USART_readln(char* str)
-{
-	int i;
-	for(i = 0; i < 100; i++)
-	{
-		*str = USART_read();
-		if(*str == ';')
-			break;
-		str++;
-	}
-}
-
 // Формирование отправка чисел в двоичном виде
 void USART_putbyteview(uint8_t data)
 {
@@ -192,33 +153,3 @@ void USART_putbyteview(uint8_t data)
 		if(!((data>>cur) & 1)) USART_write('0');
 	}
 }
-
-/*************************************
-// Отправка 2х байт
-void USART_send2bytes(uint16_t data)
-{
-	while (!(UCSR0A&(1<<UDRE0))) {}
-	UDR0 = data;
-	while (!(UCSR0A&(1<<UDRE0))) {}
-	UDR0 = data>>8;
-}
-
-void USART_send3bytes(long data)
-{
-	while (!(UCSR0A&(1<<UDRE0))) {}
-	UDR0 = data;
-	while (!(UCSR0A&(1<<UDRE0))) {}
-	UDR0 = data>>8;
-	while (!(UCSR0A&(1<<UDRE0))) {}
-	UDR0 = data>>8;
-}
-
-// Псевдоним функции отправки 2х байт
-void USART_sendoncomp(uint16_t data)
-{
-	while (!(UCSR0A&(1<<UDRE0))) {}
-	UDR0 = data;
-	while (!(UCSR0A&(1<<UDRE0))) {}
-	UDR0 = data>>8;
-}
-*************************************/

@@ -12,7 +12,7 @@ void mesure(long st)
 	USART_flush();
 	uint16_t mesure = 0;
 	uint16_t msg = 0;
-	for(;st > 0; st--)
+	for(;st >= 0; st--)
 	{
 		msg = USART_getmessage();
 		if(msg == CMD_DI)
@@ -21,7 +21,7 @@ void mesure(long st)
 		USART_send(mesure, 2);
 		DRIVER_step();
 		_delay_ms(1.4);
-		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутистами-аутсорсерами
+		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
 	}
 	USART_flush();
 	USART_send(CMD_MS, 2);
@@ -41,6 +41,7 @@ int main() {
 	float count_steps = 0;
 	uint16_t mesure_count;
 	long position;
+	uint8_t div = 1;
 	
 	while(1) {
 		command = USART_get(2);
@@ -48,34 +49,34 @@ int main() {
 		//MESURE
 		if(command == CMD_MB)
 		{
-			//DRIVER_moveto(mesure_range0);
+			USART_flush();
 			DRIVER_backward();
 			mesure(steps);
 		}
 
 		if(command == CMD_MF)
 		{
-			mesure(steps);
+			mesure(steps - 1);
 		}
 
 		if(command == CMD_MR)
 		{
-			mesure_range0 = USART_get(3);
-			mesure_range1 = USART_get(3);
+			mesure_range0 = USART_get(4);
+			mesure_range1 = USART_get(4);
 			if(mesure_range1 < mesure_range0)
 			{
 				long buf = mesure_range0;
 				mesure_range0 = mesure_range1;
 				mesure_range1 = buf;
 			}
-			steps = mesure_range1 - mesure_range0;
-			USART_println("range SET");
+			steps = (mesure_range1 - mesure_range0) * div;
+			USART_println("range\tSET");
 		}
 
 		if(command == CMD_MC)
 		{
-			mesure_count = USART_get(2);
-			USART_println("mps SET");
+			mesure_count = USART_get(4);
+			USART_println("mps\tSET");
 		}
 
 		//DRIVER
@@ -86,9 +87,9 @@ int main() {
 
 		if(command == CMD_DV)
 		{
-			uint8_t temp = (uint8_t)USART_get(2);
-			DRIVER_stepdiv(temp);
-			USART_println("divider SET");
+			div = (uint8_t)USART_get(4);
+			DRIVER_stepdiv(div);
+			USART_println("divider\tSET");
 		}
 
 		if(command == CMD_DF)
@@ -110,12 +111,11 @@ int main() {
 			DRIVER_forward();	
 			DRIVER_stepdiv(1);
 			USART_println("Callibrating...");
-			count_steps = 0;
 			while(PORTB_getpin(ENDER))
 			{
+				_delay_ms(1.4);
 				USART_print("Ender");
 				DRIVER_step();
-				count_steps++;
 			}
 			USART_println("END  ");
 
@@ -123,18 +123,44 @@ int main() {
 			DRIVER_stepdiv(8);
 			while(PORTB_getpin(ROTOR))
 			{
+				_delay_ms(1.4);
 				USART_print("Rotor");
 				DRIVER_step();
-				count_steps -= 1.0/8.0;
 			}
 			USART_println("CALLIBRATED");
-			USART_send((long)count_steps, 3);
 			DRIVER_reset();
 		}
 
 		if(command == CMD_DP)
 		{
 			DRIVER_info();
+		}
+
+		if(command == CMD_DM)
+		{
+			mesure_range0 = USART_get(4);
+			DRIVER_moveto(mesure_range0);
+			USART_println("start\tSET");
+		}
+
+		if(command == CMD_DD)
+		{
+			int dir = (int)USART_get(4);
+			if(dir == 1)
+			{
+				DRIVER_backward();
+				USART_println("backward");
+			}
+			else if(dir == -1)
+			{
+				DRIVER_forward();
+				USART_println("forward");
+			}
+			else
+			{
+				DRIVER_backward();
+				USART_println("backward");
+			}
 		}
 
 		//TEST
@@ -153,8 +179,8 @@ int main() {
 		//OTHER
 		if(command == CMD_ST)
 		{
-			steps = USART_get(2);
-			USART_println("steps SET");
+			steps = USART_get(4);
+			USART_println("steps\tSET");
 		}
 
 		if(command == CMD_CC)

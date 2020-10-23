@@ -10,12 +10,15 @@
 #define STEP 	PD6
 #define DIR 	PD7
 
+#define CLOCKWISE 	| (1<<DIR)
+#define CCLOCKWISE 	& ~(1<<DIR)
+
 long DRIVER_position;
 int DRIVER_dir = 1;
 
- /*
-  * Инициализация библиотеки двигателя
-  */
+/**
+ * Инициализация библиотеки двигателя
+ **/
 void DRIVER_init()
 {
 	DDRD |= (1<<EN)|(1<<MS1)|(1<<MS2)|(1<<MS3)|(1<<STEP)|(1<<DIR);
@@ -35,18 +38,18 @@ void DRIVER_step()
 void DRIVER_forward()
 {
 	PORTD |= (1<<DIR);
-	DRIVER_dir = 1;
+	DRIVER_dir = -1;
 }
 
 // Направление двигателя назад
 void DRIVER_backward()
 {
 	PORTD &= ~(1<<DIR);
-	DRIVER_dir = -1;
+	DRIVER_dir = 1;
 }
 
 // Установка делителя шага
-void DRIVER_stepdiv(uint8_t div)
+uint8_t DRIVER_stepdiv(uint8_t div)
 {
 	// 1    2    4    8
 	// 1    1/2  1/4  1/8
@@ -57,26 +60,32 @@ void DRIVER_stepdiv(uint8_t div)
 		PORTD &= ~(1<<MS2);
 		PORTD &= ~(1<<MS3);
 	}
-
-	if(div == 2)
+	else if(div == 2)
 	{
 		PORTD |= (1<<MS1);
 		PORTD &= ~(1<<MS2);
 		PORTD &= ~(1<<MS3);
 	}
-
-	if(div == 4)
+	else if(div == 4)
 	{
 		PORTD &= ~(1<<MS1);
 		PORTD |= (1<<MS2);
 		PORTD &= ~(1<<MS3);
 	}
-	if(div == 8)
+	else if(div == 8)
 	{
 		PORTD |= (1<<MS1);
 		PORTD |= (1<<MS2);
 		PORTD &= ~(1<<MS3);
 	}
+	else
+	{
+		PORTD &= ~(1<<MS1);
+		PORTD &= ~(1<<MS2);
+		PORTD &= ~(1<<MS3);
+		div = 1;
+	}
+	return div;
 }
 
 void DRIVER_moveto(long r1)
@@ -92,10 +101,10 @@ void DRIVER_moveto(long r1)
 		DRIVER_forward();
 		st = DRIVER_position - r1;
 	}
-	while(st > 0)
+
+	for(; st > 0; st--)
 	{
 		DRIVER_step();
-		st--;
 		_delay_ms(1.4);
 	}
 }
