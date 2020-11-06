@@ -13,7 +13,7 @@
 #define CLOCKWISE 	| (1<<DIR)
 #define CCLOCKWISE 	& ~(1<<DIR)
 
-long DRIVER_position;
+long DRIVER_position = 0;
 int DRIVER_dir = 1;
 
 /**
@@ -88,9 +88,9 @@ uint8_t DRIVER_stepdiv(uint8_t div)
 	return div;
 }
 
-void DRIVER_moveto(long r1)
+void DRIVER_moveto(uint32_t r1)
 {
-	long st;
+	uint32_t st;
 	if(DRIVER_position < r1)
 	{
 		DRIVER_backward();
@@ -101,7 +101,6 @@ void DRIVER_moveto(long r1)
 		DRIVER_forward();
 		st = DRIVER_position - r1;
 	}
-
 	for(; st > 0; st--)
 	{
 		DRIVER_step();

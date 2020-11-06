@@ -49,7 +49,7 @@ uint8_t USART_read()
 }
 
 // Чтение пакета байт
-long USART_get(uint8_t bytes)
+int32_t USART_get(uint8_t bytes)
 {
 	long cmd = 0;
 	long buf = 0;

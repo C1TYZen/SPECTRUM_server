@@ -5,24 +5,30 @@
 #include <stdlib.h>
 
 // Команды
-#define CMD_MB	25197 // начать измерение
+//set
 #define CMD_MC	25453 // установка количества измерений
+//do
+#define CMD_MB	25197 // начать измерение
 #define CMD_MR	29293 // установка диапазона измерений
 #define CMD_MS	29549 // остановить измерение
 #define CMD_MF	26221 // поиск
 
-#define CMD_DB	25188 // движение двигателя назад
-#define CMD_DC	25444 // калибровка
-#define CMD_DF	26212 // движение двигателя вперед
-#define CMD_DI	26980 // остановка двигателя
-#define CMD_DS	29540 // шаг двигателя
-#define CMD_DV	30308 // установка делителя шага
-#define CMD_DP  28772 // вывод информации о положении двигателя
-#define CMD_DM  28004 // передвинуть двигатель к указаной точке
+//set
 #define CMD_DD  25700 // установка направления
+#define CMD_DM  28004 // передвинуть двигатель к указаной точке
+#define CMD_DV	30308 // установка делителя шага
+//do
+#define CMD_DS	29540 // шаг двигателя
+#define CMD_DI	26980 // остановка двигателя
+#define CMD_DB	25188 // направление двигателя назад
+#define CMD_DF	26212 // направление двигателя вперед
+#define CMD_DC	25444 // калибровка
+#define CMD_DP  28772 // вывод информации о положении двигателя
 
-#define CMD_CC	25443 // проверить соединение
+//set
 #define CMD_ST	29811 // установка количества шагов
+//do
+#define CMD_CC	25443 // проверить соединение
 #define CMD_TP	28788 // тестирование пинов
 
 /***********************
@@ -32,7 +38,7 @@ void USART_init();
 void USART_flush();
 
 uint8_t USART_read();
-long USART_get(uint8_t bytes);
+int32_t USART_get(uint8_t bytes);
 uint8_t USART_readnow();
 uint16_t USART_getmessage();
 void USART_readln(char* str);
@@ -58,7 +64,7 @@ void DRIVER_chdir();
 void DRIVER_forward();
 void DRIVER_backward();
 uint8_t DRIVER_stepdiv(uint8_t div);
-void DRIVER_moveto(long r1);
+void DRIVER_moveto(uint32_t r1);
 void DRIVER_info();
 
 /***********************

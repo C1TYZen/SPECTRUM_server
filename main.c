@@ -35,20 +35,33 @@ int main() {
 	PORTB_init();
 
 	uint16_t command = 0;
-	long mesure_range0;
-	long mesure_range1;
-	long steps = 100;
+	uint32_t mesure_range0;
+	uint32_t mesure_range1;
+	uint32_t steps = 100;
 	float count_steps = 0;
 	uint16_t mesure_count;
-	long position;
+	int32_t position;
 	uint8_t div = 1;
 	
 	while(1) {
 		command = USART_get(2);
 
 		//MESURE
+		//set***************
+		if(command == CMD_MC)
+		{
+			mesure_count = USART_get(4);
+			USART_println("mps\tSET");
+		}
+
+		//do****************
 		if(command == CMD_MB)
 		{
+			DRIVER_stepdiv(1);
+			mesure_range0 = USART_get(4);
+			DRIVER_moveto(mesure_range0);
+
+			DRIVER_stepdiv(div);
 			USART_flush();
 			DRIVER_backward();
 			mesure(steps);
@@ -73,35 +86,56 @@ int main() {
 			USART_println("range\tSET");
 		}
 
-		if(command == CMD_MC)
-		{
-			mesure_count = USART_get(4);
-			USART_println("mps\tSET");
-		}
-
 		//DRIVER
-		if(command == CMD_DS) 
-		{
-			DRIVER_step(steps);
-		}
-
-		if(command == CMD_DV)
+		//set***************
+		if(command == CMD_DV) //divider
 		{
 			div = (uint8_t)USART_get(4);
 			DRIVER_stepdiv(div);
 			USART_println("divider\tSET");
 		}
 
+		if(command == CMD_DM) //mesure start
+		{
+			mesure_range0 = USART_get(4);
+			DRIVER_moveto(mesure_range0);
+			USART_println("start\tSET");
+		}
+
+		if(command == CMD_DD) //driver direction
+		{
+			int dir = (int)USART_get(4);
+			if(dir == 1)
+			{
+				DRIVER_backward();
+				USART_println("backward\tSET");
+			}
+			else if(dir == -1)
+			{
+				DRIVER_forward();
+				USART_println("forward\tSET");
+			}
+			else
+			{
+				DRIVER_backward();
+				USART_println("backward\tSET");
+			}
+		}
+
+		//do****************
+		if(command == CMD_DS) 
+		{
+			DRIVER_step(steps);
+		}
+
 		if(command == CMD_DF)
 		{
 			DRIVER_forward();
-			USART_println("forward");
 		}
 
 		if(command == CMD_DB)
 		{
 			DRIVER_backward();
-			USART_println("backward");
 		}
 
 		if(command == CMD_DC) 
@@ -136,33 +170,6 @@ int main() {
 			DRIVER_info();
 		}
 
-		if(command == CMD_DM)
-		{
-			mesure_range0 = USART_get(4);
-			DRIVER_moveto(mesure_range0);
-			USART_println("start\tSET");
-		}
-
-		if(command == CMD_DD)
-		{
-			int dir = (int)USART_get(4);
-			if(dir == 1)
-			{
-				DRIVER_backward();
-				USART_println("backward");
-			}
-			else if(dir == -1)
-			{
-				DRIVER_forward();
-				USART_println("forward");
-			}
-			else
-			{
-				DRIVER_backward();
-				USART_println("backward");
-			}
-		}
-
 		//TEST
 		if(command == CMD_TP)
 		{
@@ -177,12 +184,14 @@ int main() {
 		}
 
 		//OTHER
+		//set***************
 		if(command == CMD_ST)
 		{
 			steps = USART_get(4);
 			USART_println("steps\tSET");
 		}
 
+		//do****************
 		if(command == CMD_CC)
 		{
 			//USART_println("OLD WORLD NEWS");
