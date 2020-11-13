@@ -1,3 +1,13 @@
+/*
+	Интерфейс для функций установки значений:
+	function()
+	{
+		принять_значение()
+		выполнить действие()
+		отправить_строку_подтверждения()
+	}
+ */
+
 /***********************
  * MAIN
  ***********************/
@@ -6,120 +16,96 @@
 #define ENDER D8
 #define ROTOR D9
 
-void mesure(long st)
+void mesure(uint16_t st)
 {
 	_delay_ms(2);
 	USART_flush();
 	uint16_t mesure = 0;
 	uint16_t msg = 0;
-	for(;st >= 0; st--)
+	uint16_t zero = 0;
+
+	char str[2];
+	sprintf(str, "s: %d", st);
+	USART_println(str);
+	while(1)
 	{
 		msg = USART_getmessage();
 		if(msg == CMD_DI)
 			break;
 		mesure = ADC_read(0);
-		USART_send(mesure, 2);
+		USART_send(st);
 		DRIVER_step();
-		_delay_ms(1.4);
+		_delay_ms(100);
 		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
+
+		if(st < 1)
+			break;
+		st--;
 	}
 	USART_flush();
-	USART_send(CMD_MS, 2);
+	USART_send(CMD_MS);
 }
 
 int main() {
+	uint16_t command = 0;
+	uint16_t mesure_start;
+	uint16_t steps = 100;
+	uint16_t mesure_count;
+
 	// Зааааапущаем все нужные библиотеки
 	USART_init();
 	ADC_init();
 	DRIVER_init();
 	PORTB_init();
-
-	uint16_t command = 0;
-	uint32_t mesure_range0;
-	uint32_t mesure_range1;
-	uint32_t steps = 100;
-	float count_steps = 0;
-	uint16_t mesure_count;
-	int32_t position;
-	uint8_t div = 1;
 	
 	while(1) {
-		command = USART_get(2);
+		command = USART_get();
 
 		//MESURE
 		//set***************
 		if(command == CMD_MC)
 		{
-			mesure_count = USART_get(4);
+			mesure_count = USART_get();
 			USART_println("mps\tSET");
 		}
 
 		//do****************
-		if(command == CMD_MB)
+		if(command == CMD_MB) //Измерение
 		{
-			DRIVER_stepdiv(1);
-			mesure_range0 = USART_get(4);
-			DRIVER_moveto(mesure_range0);
+			DRIVER_moveto(mesure_start);
 
-			DRIVER_stepdiv(div);
-			USART_flush();
+			char str[2];
+			sprintf(str, "m: %d s: %d", mesure_start, steps);
+			//USART_println(str);
+
+			DRIVER_setdiv(DRIVER_INSTALLED_DIV, 0);
 			DRIVER_backward();
 			mesure(steps);
 		}
 
-		if(command == CMD_MF)
+		if(command == CMD_MF) //Поиск
 		{
 			mesure(steps - 1);
 		}
 
-		if(command == CMD_MR)
-		{
-			mesure_range0 = USART_get(4);
-			mesure_range1 = USART_get(4);
-			if(mesure_range1 < mesure_range0)
-			{
-				long buf = mesure_range0;
-				mesure_range0 = mesure_range1;
-				mesure_range1 = buf;
-			}
-			steps = (mesure_range1 - mesure_range0) * div;
-			USART_println("range\tSET");
-		}
-
 		//DRIVER
 		//set***************
-		if(command == CMD_DV) //divider
+		if(command == CMD_DV) //Делитель
 		{
-			div = (uint8_t)USART_get(4);
-			DRIVER_stepdiv(div);
+			DRIVER_setdiv((uint8_t)USART_get(), 1);
 			USART_println("divider\tSET");
 		}
 
-		if(command == CMD_DM) //mesure start
+		if(command == CMD_DM) //Перевод двигателя к началу измерения
 		{
-			mesure_range0 = USART_get(4);
-			DRIVER_moveto(mesure_range0);
+			mesure_start = USART_get();
 			USART_println("start\tSET");
 		}
 
-		if(command == CMD_DD) //driver direction
+		if(command == CMD_DD) //Направление двигателя
 		{
-			int dir = (int)USART_get(4);
-			if(dir == 1)
-			{
-				DRIVER_backward();
-				USART_println("backward\tSET");
-			}
-			else if(dir == -1)
-			{
-				DRIVER_forward();
-				USART_println("forward\tSET");
-			}
-			else
-			{
-				DRIVER_backward();
-				USART_println("backward\tSET");
-			}
+			DRIVER_setdir((int8_t)USART_get());
+			USART_println("dir\tSET");
 		}
 
 		//do****************
@@ -143,7 +129,7 @@ int main() {
 			// Здесь задержками являются вызовы функции print.
 			// Так двигатель крутится мягче всего.
 			DRIVER_forward();	
-			DRIVER_stepdiv(1);
+			DRIVER_setdiv(1, 0);
 			USART_println("Callibrating...");
 			while(PORTB_getpin(ENDER))
 			{
@@ -154,7 +140,7 @@ int main() {
 			USART_println("END  ");
 
 			DRIVER_backward();
-			DRIVER_stepdiv(8);
+			DRIVER_setdiv(8, 0);
 			while(PORTB_getpin(ROTOR))
 			{
 				_delay_ms(1.4);
@@ -163,11 +149,6 @@ int main() {
 			}
 			USART_println("CALLIBRATED");
 			DRIVER_reset();
-		}
-
-		if(command == CMD_DP)
-		{
-			DRIVER_info();
 		}
 
 		//TEST
@@ -187,7 +168,7 @@ int main() {
 		//set***************
 		if(command == CMD_ST)
 		{
-			steps = USART_get(4);
+			steps = USART_get();
 			USART_println("steps\tSET");
 		}
 

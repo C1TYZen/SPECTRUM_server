@@ -13,8 +13,9 @@
 #define CLOCKWISE 	| (1<<DIR)
 #define CCLOCKWISE 	& ~(1<<DIR)
 
-long DRIVER_position = 0;
-int DRIVER_dir = 1;
+uint16_t DRIVER_position = 0;
+int8_t DRIVER_dir = 1;
+uint8_t DRIVER_div = 1;
 
 /**
  * Инициализация библиотеки двигателя
@@ -48,13 +49,42 @@ void DRIVER_backward()
 	DRIVER_dir = 1;
 }
 
+int8_t DRIVER_setdir(int8_t dir)
+{
+	if(dir == 1) //back
+	{
+		PORTD &= ~(1<<DIR);
+		DRIVER_dir = 1;
+		return 1;
+	}
+	else if(dir == -1) //fwd
+	{
+		PORTD |= (1<<DIR);
+		DRIVER_dir = -1;
+		return 0;
+	}
+	else
+	{
+		PORTD &= ~(1<<DIR);
+		DRIVER_dir = 1;
+		return -1;
+	}
+}
+
 // Установка делителя шага
-uint8_t DRIVER_stepdiv(uint8_t div)
+int8_t DRIVER_setdiv(uint8_t div, uint8_t save)
 {
 	// 1    2    4    8
 	// 1    1/2  1/4  1/8
 	// 1/16 не работает
-	if(div == 1)
+	if(save)
+		DRIVER_div = div;
+
+	if(div == 0)
+	{
+		DRIVER_setdiv(DRIVER_div, 0);
+	}
+	else if(div == 1)
 	{
 		PORTD &= ~(1<<MS1);
 		PORTD &= ~(1<<MS2);
@@ -83,34 +113,75 @@ uint8_t DRIVER_stepdiv(uint8_t div)
 		PORTD &= ~(1<<MS1);
 		PORTD &= ~(1<<MS2);
 		PORTD &= ~(1<<MS3);
+		DRIVER_div = 1;
 		div = 1;
 	}
 	return div;
 }
 
-void DRIVER_moveto(uint32_t r1)
+void DRIVER_moveto(uint16_t start)
 {
-	uint32_t st;
-	if(DRIVER_position < r1)
+	int8_t dir;
+	uint16_t steps = 0;
+	char str[4];
+
+	if(DRIVER_position < start)
 	{
-		DRIVER_backward();
-		st = r1 - DRIVER_position;
+		dir = 1;
+		DRIVER_setdir(dir);
+		steps = start - DRIVER_position;
 	}
-	else
+	else if(DRIVER_position > start)
 	{
-		DRIVER_forward();
-		st = DRIVER_position - r1;
+		dir = -1;
+		DRIVER_setdir(dir);
+		steps = DRIVER_position - start;
 	}
-	for(; st > 0; st--)
+	/*else
+	{
+		return;
+	}*/
+
+	while(DRIVER_position != start)
+	{
+		DRIVER_setdiv(1, 0);
+		if(DRIVER_position < 1)
+			DRIVER_setdiv(2, 0);
+		if(DRIVER_position < 0.5)
+			DRIVER_setdiv(4, 0);
+		if(DRIVER_position < 0.25)
+			DRIVER_setdiv(8, 0);
+		
+		DRIVER_step();
+		_delay_ms(1.4);
+		steps--;
+		sprintf(str, "s: %d", steps);
+		//USART_println(str);
+	}
+
+	/*if(dir == 1)
+		return;
+
+	DRIVER_setdiv(1);
+
+	for(st = 3; st > 0; st--)
 	{
 		DRIVER_step();
 		_delay_ms(1.4);
 	}
+
+	DRIVER_setdir(dir);
+
+	for(st = 3; st > 0; st--)
+	{
+		DRIVER_step();
+		_delay_ms(1.4);
+	}*/
 }
 
-void DRIVER_info()
+uint16_t DRIVER_info()
 {
-	USART_send(DRIVER_position, 3);
+	return DRIVER_position;
 }
 
 void DRIVER_reset()

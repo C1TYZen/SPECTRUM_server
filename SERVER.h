@@ -3,6 +3,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 // Команды
 //set
@@ -38,13 +39,13 @@ void USART_init();
 void USART_flush();
 
 uint8_t USART_read();
-int32_t USART_get(uint8_t bytes);
+uint16_t USART_get();
 uint8_t USART_readnow();
 uint16_t USART_getmessage();
 void USART_readln(char* str);
 
 void USART_write(uint8_t data);
-void USART_send(long data, uint8_t bytes);
+void USART_send(uint16_t data);
 void USART_println(char* string);
 void USART_print(char* string);
 void USART_putbyteview(uint8_t data);
@@ -58,14 +59,20 @@ uint16_t ADC_read(uint8_t ch);
 /***********************
  * DRIVER
  ***********************/
+#define DRIVER_INSTALLED_DIV 0
+#define DRIVER_BCK 1
+#define DIRVER_FWD -1
+
 void DRIVER_init();
 void DRIVER_step();
 void DRIVER_chdir();
 void DRIVER_forward();
 void DRIVER_backward();
-uint8_t DRIVER_stepdiv(uint8_t div);
-void DRIVER_moveto(uint32_t r1);
-void DRIVER_info();
+int8_t DRIVER_setdir(int8_t dir);
+int8_t DRIVER_setdiv(uint8_t div, uint8_t save);
+void DRIVER_moveto(uint16_t r1);
+
+uint16_t DRIVER_info();
 
 /***********************
  * PORTB

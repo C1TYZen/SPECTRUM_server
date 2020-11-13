@@ -12,8 +12,8 @@
                 "_UNICODE"
             ],
             "compilerPath": "C:/MyProrgrams/WinAVR/bin/avr-gcc.exe",
-            "cStandard": "gnu11",
-            "cppStandard": "gnu++14",
+            "cStandard": "gnu99",
+            "cppStandard": "gnu++11",
             "intelliSenseMode": "gcc-x64"
         }
     ],

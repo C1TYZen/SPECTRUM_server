@@ -49,12 +49,12 @@ uint8_t USART_read()
 }
 
 // Чтение пакета байт
-int32_t USART_get(uint8_t bytes)
+uint16_t USART_get()
 {
-	long cmd = 0;
-	long buf = 0;
+	uint16_t cmd = 0;
+	uint16_t buf = 0;
 	uint8_t i = 0;
-	for(i = 0; i < bytes; i++)
+	for(i = 0; i < 2; i++)
 	{
 		while (!(UCSR0A&(1<<RXC0))) {}
 		buf = UDR0;
@@ -106,10 +106,10 @@ void USART_write(uint8_t data)
 }
 
 // Отправка пакета байт
-void USART_send(long data, uint8_t bytes)
+void USART_send(uint16_t data)
 {
 	uint8_t i = 0;
-	for(i = 0; i < bytes; i++)
+	for(i = 0; i < 2; i++)
 	{
 		data = (data>>(8 * i));
 		while (!(UCSR0A&(1<<UDRE0))) {}

@@ -3,6 +3,9 @@
  ***********************/
 #include "SERVER.h"
 
+#define ENDER D8
+#define ROTOR D9
+
 /*
  * Подтяжка к питанию должна быть выключена (в PORTB должен быть записан 0)
  * В противном случае пины не реагируют на оптопару. Черт знает почему.
@@ -21,4 +24,16 @@ uint8_t PORTB_getpin(int pin)
 		return 0;
 	else
 		return 1;
+}
+
+uint8_t PORTB_test()
+{
+	if(PORTB_getpin(ENDER))
+		return 81;
+	else
+		return 80;
+	if(PORTB_getpin(ROTOR))
+		return 91;
+	else
+		return 90;
 }
