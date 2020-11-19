@@ -24,18 +24,15 @@ void mesure(uint16_t st)
 	uint16_t msg = 0;
 	uint16_t zero = 0;
 
-	char str[2];
-	sprintf(str, "s: %d", st);
-	USART_println(str);
 	while(1)
 	{
 		msg = USART_getmessage();
 		if(msg == CMD_DI)
 			break;
 		mesure = ADC_read(0);
-		USART_send(st);
+		USART_send(mesure);
 		DRIVER_step();
-		_delay_ms(100);
+		_delay_ms(1.4);
 		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
 
 		if(st < 1)
@@ -74,10 +71,6 @@ int main() {
 		{
 			DRIVER_moveto(mesure_start);
 
-			char str[2];
-			sprintf(str, "m: %d s: %d", mesure_start, steps);
-			//USART_println(str);
-
 			DRIVER_setdiv(DRIVER_INSTALLED_DIV, 0);
 			DRIVER_backward();
 			mesure(steps);
@@ -96,7 +89,7 @@ int main() {
 			USART_println("divider\tSET");
 		}
 
-		if(command == CMD_DM) //Перевод двигателя к началу измерения
+		if(command == CMD_DM) //Установка начала измерения
 		{
 			mesure_start = USART_get();
 			USART_println("start\tSET");

@@ -31,6 +31,7 @@ void DRIVER_init()
 // Шаг двигателя
 void DRIVER_step()
 {
+	//ДЕЛИТЕЛЬ ТУТ ПОСТАВЬ, ДУБИНА
 	PORTD ^= (1<<STEP);
 	DRIVER_position += DRIVER_dir;
 }
@@ -123,7 +124,6 @@ void DRIVER_moveto(uint16_t start)
 {
 	int8_t dir;
 	uint16_t steps = 0;
-	char str[4];
 
 	if(DRIVER_position < start)
 	{
@@ -145,18 +145,16 @@ void DRIVER_moveto(uint16_t start)
 	while(DRIVER_position != start)
 	{
 		DRIVER_setdiv(1, 0);
-		if(DRIVER_position < 1)
+		/*if(DRIVER_position < 1)
 			DRIVER_setdiv(2, 0);
 		if(DRIVER_position < 0.5)
 			DRIVER_setdiv(4, 0);
 		if(DRIVER_position < 0.25)
-			DRIVER_setdiv(8, 0);
+			DRIVER_setdiv(8, 0);*/
 		
 		DRIVER_step();
 		_delay_ms(1.4);
 		steps--;
-		sprintf(str, "s: %d", steps);
-		//USART_println(str);
 	}
 
 	/*if(dir == 1)
