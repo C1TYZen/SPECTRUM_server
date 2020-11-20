@@ -69,7 +69,7 @@ void DRIVER_chdir();
 void DRIVER_forward();
 void DRIVER_backward();
 int8_t DRIVER_setdir(int8_t dir);
-int8_t DRIVER_setdiv(uint8_t div, uint8_t save);
+int8_t DRIVER_setdiv(uint8_t div);
 void DRIVER_moveto(uint16_t r1);
 
 uint16_t DRIVER_info();

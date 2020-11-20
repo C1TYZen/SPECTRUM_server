@@ -30,7 +30,8 @@ void mesure(uint16_t st)
 		if(msg == CMD_DI)
 			break;
 		mesure = ADC_read(0);
-		USART_send(mesure);
+		//USART_send(mesure);
+		USART_send(DRIVER_info());
 		DRIVER_step();
 		_delay_ms(1.4);
 		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
@@ -48,6 +49,9 @@ int main() {
 	uint16_t mesure_start;
 	uint16_t steps = 100;
 	uint16_t mesure_count;
+
+	uint8_t cfg_div = 1;
+	uint8_t cfg_dir = 1;
 
 	// Зааааапущаем все нужные библиотеки
 	USART_init();
@@ -71,7 +75,7 @@ int main() {
 		{
 			DRIVER_moveto(mesure_start);
 
-			DRIVER_setdiv(DRIVER_INSTALLED_DIV, 0);
+			DRIVER_setdiv(cfg_div);
 			DRIVER_backward();
 			mesure(steps);
 		}
@@ -85,7 +89,7 @@ int main() {
 		//set***************
 		if(command == CMD_DV) //Делитель
 		{
-			DRIVER_setdiv((uint8_t)USART_get(), 1);
+			cfg_div = (uint8_t)USART_get();
 			USART_println("divider\tSET");
 		}
 
@@ -97,7 +101,7 @@ int main() {
 
 		if(command == CMD_DD) //Направление двигателя
 		{
-			DRIVER_setdir((int8_t)USART_get());
+			cfg_dir = (int8_t)USART_get();
 			USART_println("dir\tSET");
 		}
 
@@ -122,7 +126,7 @@ int main() {
 			// Здесь задержками являются вызовы функции print.
 			// Так двигатель крутится мягче всего.
 			DRIVER_forward();	
-			DRIVER_setdiv(1, 0);
+			DRIVER_setdiv(1);
 			USART_println("Callibrating...");
 			while(PORTB_getpin(ENDER))
 			{
@@ -133,7 +137,7 @@ int main() {
 			USART_println("END  ");
 
 			DRIVER_backward();
-			DRIVER_setdiv(8, 0);
+			DRIVER_setdiv(8);
 			while(PORTB_getpin(ROTOR))
 			{
 				_delay_ms(1.4);

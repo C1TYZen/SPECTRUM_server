@@ -31,7 +31,6 @@ void DRIVER_init()
 // Шаг двигателя
 void DRIVER_step()
 {
-	//ДЕЛИТЕЛЬ ТУТ ПОСТАВЬ, ДУБИНА
 	PORTD ^= (1<<STEP);
 	DRIVER_position += DRIVER_dir;
 }
@@ -73,41 +72,38 @@ int8_t DRIVER_setdir(int8_t dir)
 }
 
 // Установка делителя шага
-int8_t DRIVER_setdiv(uint8_t div, uint8_t save)
+int8_t DRIVER_setdiv(uint8_t div)
 {
 	// 1    2    4    8
 	// 1    1/2  1/4  1/8
 	// 1/16 не работает
-	if(save)
-		DRIVER_div = div;
-
-	if(div == 0)
-	{
-		DRIVER_setdiv(DRIVER_div, 0);
-	}
-	else if(div == 1)
+	if(div == 1)
 	{
 		PORTD &= ~(1<<MS1);
 		PORTD &= ~(1<<MS2);
 		PORTD &= ~(1<<MS3);
+		DRIVER_div = 1;
 	}
 	else if(div == 2)
 	{
 		PORTD |= (1<<MS1);
 		PORTD &= ~(1<<MS2);
 		PORTD &= ~(1<<MS3);
+		DRIVER_div = 2;
 	}
 	else if(div == 4)
 	{
 		PORTD &= ~(1<<MS1);
 		PORTD |= (1<<MS2);
 		PORTD &= ~(1<<MS3);
+		DRIVER_div = 4;
 	}
 	else if(div == 8)
 	{
 		PORTD |= (1<<MS1);
 		PORTD |= (1<<MS2);
 		PORTD &= ~(1<<MS3);
+		DRIVER_div = 8;
 	}
 	else
 	{
@@ -144,7 +140,7 @@ void DRIVER_moveto(uint16_t start)
 
 	while(DRIVER_position != start)
 	{
-		DRIVER_setdiv(1, 0);
+		DRIVER_setdiv(1);
 		/*if(DRIVER_position < 1)
 			DRIVER_setdiv(2, 0);
 		if(DRIVER_position < 0.5)
