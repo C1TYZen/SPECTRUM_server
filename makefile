@@ -26,25 +26,25 @@ help:
 	
 #.o
 
-main.o: main.c
+main.o: src/main.c
 	@echo "---main.c--------------------------"
-	$(COMPILE) -c main.c
+	$(COMPILE) -c src/main.c
 
-USART.o: USART.c
+USART.o: src/USART.c
 	@echo "---USART.c-------------------------"
-	$(COMPILE) -c USART.c
+	$(COMPILE) -c src/USART.c
 
-DRIVER.o: DRIVER.c
+DRIVER.o: src/DRIVER.c
 	@echo "---DRIVER.c------------------------"
-	$(COMPILE) -c DRIVER.c
+	$(COMPILE) -c src/DRIVER.c
 
-ADC.o: ADC.c
+ADC.o: src/ADC.c
 	@echo "---ADC.c---------------------------"
-	$(COMPILE) -c ADC.c
+	$(COMPILE) -c src/ADC.c
 
-PORTB.o: PORTB.c
+PORTB.o: src/PORTB.c
 	@echo "---PORTB.c---------------------------"
-	$(COMPILE) -c PORTB.c
+	$(COMPILE) -c src/PORTB.c
 
 #.dmp
 
