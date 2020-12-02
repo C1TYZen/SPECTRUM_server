@@ -13,7 +13,7 @@
 #define CLOCKWISE 	| (1<<DIR)
 #define CCLOCKWISE 	& ~(1<<DIR)
 
-uint16_t DRIVER_position = 0;
+uint32_t DRIVER_position = 0;
 int8_t DRIVER_dir = 1;
 uint8_t DRIVER_div = 1;
 
@@ -32,7 +32,7 @@ void DRIVER_init()
 void DRIVER_step()
 {
 	PORTD ^= (1<<STEP);
-	DRIVER_position += DRIVER_dir;
+	DRIVER_position += DRIVER_dir * (8/DRIVER_div);
 }
 
 // Направление двигателя вперед
@@ -116,67 +116,60 @@ int8_t DRIVER_setdiv(uint8_t div)
 	return div;
 }
 
-void DRIVER_moveto(uint16_t start)
+void DRIVER_mvf(uint32_t trg)
 {
-	int8_t dir;
-	uint16_t steps = 0;
-	uint16_t pos = DRIVER_position / DRIVER_div;
+	DRIVER_setdir(-1);
+	while(DRIVER_position > trg)
+	{
+		DRIVER_setdiv(1);
+		if((DRIVER_position - trg) < 8)
+			DRIVER_setdiv(2);
+		if((DRIVER_position - trg) < 4)
+			DRIVER_setdiv(4);
+		if((DRIVER_position - trg) < 2)
+			DRIVER_setdiv(8);
 
+		DRIVER_step();
+		_delay_ms(1.4);
+	}
+}
+
+void DRIVER_mvb(uint32_t trg)
+{
+	DRIVER_setdir(1);
+	while(DRIVER_position < trg)
+	{
+		DRIVER_setdiv(1);
+		if((trg - DRIVER_position) < 8)
+			DRIVER_setdiv(2);
+		if((trg - DRIVER_position) < 4)
+			DRIVER_setdiv(4);
+		if((trg - DRIVER_position) < 2)
+			DRIVER_setdiv(8);
+
+		DRIVER_step();
+		_delay_ms(1.4);
+	}
+}
+
+void DRIVER_moveto(uint32_t start)
+{
+	start *= 8;
 	if(DRIVER_position < start)
 	{
-		dir = 1;
-		DRIVER_setdir(dir);
-		steps = start - DRIVER_position;
+		DRIVER_mvb(start);
 	}
 	else if(DRIVER_position > start)
 	{
-		dir = -1;
-		DRIVER_setdir(dir);
-		steps = DRIVER_position - start;
+		DRIVER_mvf(start);
 	}
-	/*else
-	{
+	else
 		return;
-	}*/
-
-	while(DRIVER_position != start)
-	{
-		DRIVER_setdiv(1);
-		/*if(DRIVER_position < 1)
-			DRIVER_setdiv(2, 0);
-		if(DRIVER_position < 0.5)
-			DRIVER_setdiv(4, 0);
-		if(DRIVER_position < 0.25)
-			DRIVER_setdiv(8, 0);*/
-		
-		DRIVER_step();
-		_delay_ms(1.4);
-		steps--;
-	}
-
-	/*if(dir == 1)
-		return;
-
-	DRIVER_setdiv(1);
-
-	for(st = 3; st > 0; st--)
-	{
-		DRIVER_step();
-		_delay_ms(1.4);
-	}
-
-	DRIVER_setdir(dir);
-
-	for(st = 3; st > 0; st--)
-	{
-		DRIVER_step();
-		_delay_ms(1.4);
-	}*/
 }
 
-uint16_t DRIVER_info()
+uint32_t DRIVER_info()
 {
-	return DRIVER_position / DRIVER_div;
+	return DRIVER_position;
 }
 
 void DRIVER_reset()

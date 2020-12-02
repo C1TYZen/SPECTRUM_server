@@ -50,23 +50,23 @@ PORTB.o: src/PORTB.c
 
 main.dmp: main.o
 	@echo "---main dump-----------------------"
-	avr-objdump -d main.o > dump/main.dmp
+	avr-objdump -d main.o > dmp/main.dmp
 
 USART.dmp: USART.o
 	@echo "---USART dump----------------------"
-	avr-objdump -d USART.o > dump/USART.dmp
+	avr-objdump -d USART.o > dmp/USART.dmp
 
 DRIVER.dmp: DRIVER.o
 	@echo "---DRIVER dump---------------------"
-	avr-objdump -d DRIVER.o > dump/DRIVER.dmp
+	avr-objdump -d DRIVER.o > dmp/DRIVER.dmp
 
 ADC.dmp: ADC.o
 	@echo "---ADC dump------------------------"
-	avr-objdump -d ADC.o > dump/ADC.dmp
+	avr-objdump -d ADC.o > dmp/ADC.dmp
 
 PORTB.dmp: PORTB.o
 	@echo "---PORTB dump----------------------"
-	avr-objdump -d PORTB.o > dump/ADC.dmp
+	avr-objdump -d PORTB.o > dmp/ADC.dmp
 
 #.hex .elf
 
@@ -100,7 +100,7 @@ dmp: main.dmp USART.dmp DRIVER.dmp ADC.dmp
 #-------------
 
 cln:
-	rm -v *.hex *.elf *.o dump/*.dmp
+	rm -v *.hex *.elf *.o dmp/*.dmp
 
 clnhex:
 	rm -v *.hex *.elf
@@ -109,4 +109,4 @@ clnobj:
 	rm -v *.o
 
 clndmp:
-	rm -v dump/*.dmp
+	rm -v dmp/*.dmp

@@ -16,29 +16,40 @@
 #define ENDER D8
 #define ROTOR D9
 
-void mesure(uint16_t st)
+/* Заготовка под человека
+typedef struct
+{
+	uint16_t start;
+	uint16_t steps;
+	uint16_t mps;
+	uint8_t div;
+	uint8_t dir;
+}config_info;
+*/
+
+void mesure(uint16_t st, uint16_t mc)
 {
 	_delay_ms(2);
 	USART_flush();
 	uint16_t mesure = 0;
 	uint16_t msg = 0;
-	uint16_t zero = 0;
+	uint8_t i;
 
 	while(1)
 	{
+		mesure = 0;
+		for(i = mc; i > 0; i--)
+			mesure += ADC_read(0);
+		mesure /= mc;
+		USART_send(mesure);
+
 		msg = USART_getmessage();
-		if(msg == CMD_DI)
+		if((msg == CMD_DI) || (st < 1))
 			break;
-		mesure = ADC_read(0);
-		//USART_send(mesure);
-		USART_send(DRIVER_info());
 		DRIVER_step();
+		st--;
 		_delay_ms(1.4);
 		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
-
-		if(st < 1)
-			break;
-		st--;
 	}
 	USART_flush();
 	USART_send(CMD_MS);
@@ -46,14 +57,13 @@ void mesure(uint16_t st)
 
 int main() {
 	uint16_t command = 0;
-	uint16_t mesure_start;
-	uint16_t steps = 100;
-	uint16_t mesure_count;
-
+	uint16_t cfg_mesure_start;
+	uint16_t cfg_steps = 100;
+	uint16_t cfg_mesure_count = 1;
 	uint8_t cfg_div = 1;
 	uint8_t cfg_dir = 1;
 
-	// Зааааапущаем все нужные библиотеки
+	// Зааааапущаем все библиотеки
 	USART_init();
 	ADC_init();
 	DRIVER_init();
@@ -66,23 +76,18 @@ int main() {
 		//set***************
 		if(command == CMD_MC)
 		{
-			mesure_count = USART_get();
+			cfg_mesure_count = USART_get();
 			USART_println("mps\tSET");
 		}
 
 		//do****************
 		if(command == CMD_MB) //Измерение
 		{
-			DRIVER_moveto(mesure_start);
+			DRIVER_moveto(cfg_mesure_start);
 
 			DRIVER_setdiv(cfg_div);
 			DRIVER_backward();
-			mesure(steps);
-		}
-
-		if(command == CMD_MF) //Поиск
-		{
-			mesure(steps - 1);
+			mesure(cfg_steps, cfg_mesure_count);
 		}
 
 		//DRIVER
@@ -95,7 +100,7 @@ int main() {
 
 		if(command == CMD_DM) //Установка начала измерения
 		{
-			mesure_start = USART_get();
+			cfg_mesure_start = USART_get();
 			USART_println("start\tSET");
 		}
 
@@ -108,7 +113,7 @@ int main() {
 		//do****************
 		if(command == CMD_DS) 
 		{
-			DRIVER_step(steps);
+			DRIVER_step(cfg_steps);
 		}
 
 		if(command == CMD_DF)
@@ -123,8 +128,6 @@ int main() {
 
 		if(command == CMD_DC) 
 		{
-			// Здесь задержками являются вызовы функции print.
-			// Так двигатель крутится мягче всего.
 			DRIVER_forward();	
 			DRIVER_setdiv(1);
 			USART_println("Callibrating...");
@@ -165,7 +168,7 @@ int main() {
 		//set***************
 		if(command == CMD_ST)
 		{
-			steps = USART_get();
+			cfg_steps = USART_get();
 			USART_println("steps\tSET");
 		}
 

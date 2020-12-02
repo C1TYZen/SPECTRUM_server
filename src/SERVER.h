@@ -70,9 +70,11 @@ void DRIVER_forward();
 void DRIVER_backward();
 int8_t DRIVER_setdir(int8_t dir);
 int8_t DRIVER_setdiv(uint8_t div);
-void DRIVER_moveto(uint16_t r1);
-
-uint16_t DRIVER_info();
+void DRIVER_mvf(uint32_t trg);
+void DRIVER_mvb(uint32_t trg);
+void DRIVER_moveto(uint32_t r1);
+uint32_t DRIVER_info();
+void DRIVER_reset();
 
 /***********************
  * PORTB
