@@ -24,10 +24,10 @@ typedef struct
 	uint16_t mps;
 	uint8_t div;
 	uint8_t dir;
-}config_info;
+} config_info;
 */
 
-void mesure(uint16_t st, uint16_t mc)
+void mesure(uint32_t st, uint16_t mc)
 {
 	_delay_ms(2);
 	USART_flush();
@@ -42,6 +42,7 @@ void mesure(uint16_t st, uint16_t mc)
 			mesure += ADC_read(0);
 		mesure /= mc;
 		USART_send(mesure);
+		//USART_send(DRIVER_info()/8);
 
 		msg = USART_getmessage();
 		if((msg == CMD_DI) || (st < 1))
@@ -85,9 +86,10 @@ int main() {
 		{
 			DRIVER_moveto(cfg_mesure_start);
 
-			DRIVER_setdiv(cfg_div);
+			cfg_div = DRIVER_setdiv(cfg_div);
 			DRIVER_backward();
-			mesure(cfg_steps, cfg_mesure_count);
+			uint32_t steps = (uint32_t)cfg_steps * (uint32_t)cfg_div;
+			mesure(steps, cfg_mesure_count);
 		}
 
 		//DRIVER
@@ -98,7 +100,7 @@ int main() {
 			USART_println("divider\tSET");
 		}
 
-		if(command == CMD_DM) //Установка начала измерения
+		if(command == CMD_DM) //Начало измерения
 		{
 			cfg_mesure_start = USART_get();
 			USART_println("start\tSET");
