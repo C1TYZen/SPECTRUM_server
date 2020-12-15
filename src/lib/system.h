@@ -63,6 +63,16 @@ uint16_t ADC_read(uint8_t ch);
 #define DRIVER_BCK 1
 #define DIRVER_FWD -1
 
+typedef struct
+{
+	int EN;
+	int MS1;
+	int MS2;
+	int MS3;
+	int STEP;
+	int DIR;
+} driver_config;
+
 void DRIVER_init();
 void DRIVER_step();
 void DRIVER_chdir();
@@ -87,3 +97,6 @@ void DRIVER_reset();
 
 void PORTB_init();
 uint8_t PORTB_getpin(int pin);
+void PORTB_writepin(int pin, int bit);
+void PORTB_pinmod(int pin, int mod);
+uint8_t PORTB_test();

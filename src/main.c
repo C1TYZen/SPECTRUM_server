@@ -11,10 +11,11 @@
 /***********************
  * MAIN
  ***********************/
-#include "SERVER.h"
+#include "lib/system.h"
 
-#define ENDER D8
-#define ROTOR D9
+#define ENDER 	D8
+#define ROTOR 	D9
+#define SRF 	D10
 
 /* Заготовка под человека
 typedef struct
@@ -56,13 +57,59 @@ void mesure(uint32_t st, uint16_t mc)
 	USART_send(CMD_MS);
 }
 
+void filter(int n) 
+{
+	// Читаем состояние линии (в неактивном состоянии оба контроллера
+	// настраивают линию на "вход" и подтягивают к +5В)
+	int SRFS = PORTB_getpin(SRF);
+
+	//Если нога подтянута к земле со стороны БС(блока светофильтров), 
+	//то значит он занят - ничего не предпринимаем...
+	if (SRFS == 0) {
+		return;
+	}
+	// ...иначе опускаем вывод, сообщая светофильтру, 
+	// что сейчас будет  передоваться команда
+	PORTB_writepin(SRF, 0);
+	PORTB_pinmod(SRF, 1);
+	_delay_ms(2);
+	// В цикле передаем команду
+	int k = 0;
+	for (k = 1; k <= 6; k++)
+	{
+		if (n > 0) {
+			PORTB_writepin(SRF, 1);
+			n--;
+		} else {
+			PORTB_writepin(SRF, 0);
+		}
+		_delay_ms(2);
+	}
+	// Настраиваем вывод на вход по окончанию передачи
+	PORTB_pinmod(SRF, 0);
+	_delay_ms(300);
+	// Записываем состояние фильтра
+	return n;
+}
+
 int main() {
 	uint16_t command = 0;
 	uint16_t cfg_mesure_start;
 	uint16_t cfg_steps = 100;
 	uint16_t cfg_mesure_count = 1;
+	uint8_t cfg_filter = 0;
 	uint8_t cfg_div = 1;
 	uint8_t cfg_dir = 1;
+
+	driver_config drv_cfg = 
+	{
+		.EN = PD2,
+		.MS1 = PD3,
+		.MS2 = PD4,
+		.MS3 = PD5,
+		.STEP = PD6,
+		.DIR = PD7
+	};
 
 	// Зааааапущаем все библиотеки
 	USART_init();

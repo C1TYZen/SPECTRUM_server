@@ -1,7 +1,7 @@
 /***********************
  * DRIVER
  ***********************/
-#include "SERVER.h"
+#include "system.h"
 
 #define EN		PD2
 #define MS1		PD3

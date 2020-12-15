@@ -1,7 +1,7 @@
 /***********************
  * PORTB
  ***********************/
-#include "SERVER.h"
+#include "system.h"
 
 #define ENDER D8
 #define ROTOR D9
@@ -24,6 +24,24 @@ uint8_t PORTB_getpin(int pin)
 		return 0;
 	else
 		return 1;
+}
+
+void PORTB_writepin(int pin, int bit)
+{
+	if(bit == 1)
+		PORTB |= (1<<pin);
+
+	if(bit == 0)
+		PORTB &= ~(1<<pin);
+}
+
+void PORTB_pinmod(int pin, int mod)
+{
+	if(mod == 1)
+		DDRB |= (1<<pin);
+
+	if(mod == 0)
+		DDRB &= ~(1<<pin);
 }
 
 uint8_t PORTB_test()

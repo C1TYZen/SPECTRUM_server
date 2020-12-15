@@ -1,23 +1,23 @@
 #ATmega168p makefile
 
+LIBPATH = src/lib/
+LIBOBJ = USART.o DRIVER.o ADC.o PORTB.o
+
 GCCDEVICE=	atmega168p
 ADDEVICE = m168
 F_CPU = 16000000 # in Hz
 
-OBJECTS = main.o USART.o DRIVER.o ADC.o PORTB.o
-
-DEBUGCOMPILE = avr-gcc -Wall -Os -g -DF_CPU=$(F_CPU) -mmcu=$(GCCDEVICE)
 COMPILE = avr-gcc -Os -DF_CPU=$(F_CPU) -mmcu=$(GCCDEVICE)
-
+DEBUGCOMPILE = avr-gcc -Wall -Os -g -DF_CPU=$(F_CPU) -mmcu=$(GCCDEVICE)
 AVRDUDE = avrdude -c usbasp -P COM3 -p $(ADDEVICE) -F
 
 help:
 	@echo "This Makefile has no default rule. Use one of the following:"
 	@echo "    make obj ....... build .o files"
-	@echo "    make bld ....... build firmware"
-	@echo "    make upl ....... flash firmware"
-	@echo "    make sze ....... print size"
-	@echo "    make dmp ....... dump files"
+	@echo "    make main ...... build main"
+	@echo "    make slave ..... build filter_slave"
+	@echo "    make uplmain ... upload main"
+	@echo "    make uplslave .. upload filter_slave"
 	@echo "    ......."
 	@echo "    make cln ....... delete object and hex files"
 	@echo "    make clnhex .... delete hex files"
@@ -25,29 +25,33 @@ help:
 	@echo "    make clndmp .... delete dump files"
 	
 #.o
-
+#programs
 main.o: src/main.c
 	@echo "---main.c--------------------------"
 	$(COMPILE) -c src/main.c
 
-USART.o: src/USART.c
+slave.o: src/slave.c
+	@echo "---slave.c--------------------------"
+	$(COMPILE) -c src/slave.c
+
+#lib
+USART.o: $(LIBPATH)USART.c
 	@echo "---USART.c-------------------------"
-	$(COMPILE) -c src/USART.c
+	$(COMPILE) -c $(LIBPATH)USART.c
 
-DRIVER.o: src/DRIVER.c
+DRIVER.o: $(LIBPATH)DRIVER.c
 	@echo "---DRIVER.c------------------------"
-	$(COMPILE) -c src/DRIVER.c
+	$(COMPILE) -c $(LIBPATH)DRIVER.c
 
-ADC.o: src/ADC.c
+ADC.o: $(LIBPATH)ADC.c
 	@echo "---ADC.c---------------------------"
-	$(COMPILE) -c src/ADC.c
+	$(COMPILE) -c $(LIBPATH)ADC.c
 
-PORTB.o: src/PORTB.c
+PORTB.o: $(LIBPATH)PORTB.c
 	@echo "---PORTB.c---------------------------"
-	$(COMPILE) -c src/PORTB.c
+	$(COMPILE) -c $(LIBPATH)PORTB.c
 
 #.dmp
-
 main.dmp: main.o
 	@echo "---main dump-----------------------"
 	avr-objdump -d main.o > dmp/main.dmp
@@ -69,26 +73,38 @@ PORTB.dmp: PORTB.o
 	avr-objdump -d PORTB.o > dmp/ADC.dmp
 
 #.hex .elf
-
-main.elf: $(OBJECTS)
+main.elf: main.o USART.o DRIVER.o ADC.o PORTB.o
 	@echo "---.elf files----------------------"
-	$(COMPILE) -o main.elf $(OBJECTS)
+	$(COMPILE) -o main.elf main.o $(LIBOBJ)
 
 main.hex: main.elf
 	@echo "---.hex files----------------------"
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 	avr-size -C --mcu=$(GCCDEVICE) main.elf
 
+slave.elf: slave.o USART.o DRIVER.o PORTB.o
+	@echo "---.elf files----------------------"
+	$(COMPILE) -o slave.elf slave.o $(LIBOBJ)
+
+slave.hex: slave.elf
+	@echo "---.hex files----------------------"
+	avr-objcopy -j .text -j .data -O ihex slave.elf slave.hex
+	avr-size -C --mcu=$(GCCDEVICE) slave.elf
+
 #-------------
 #commands-----
 #-------------
+obj: main.o slave.o $(LIBOBJ)
 
-obj: $(OBJECTS)
+main: main.hex
 
-bld: main.hex
+slave: slave.hex
 
-upl: main.hex
+uplmain: main.hex
 	$(AVRDUDE) -U flash:w:main.hex:i
+
+uplslave: slave.hex
+	$(AVRDUDE) -U flash:w:slave.hex:i
 
 sze: main.elf
 	avr-size -C --mcu=$(GCCDEVICE) main.elf
@@ -98,7 +114,6 @@ dmp: main.dmp USART.dmp DRIVER.dmp ADC.dmp
 #-------------
 #clean--------
 #-------------
-
 cln:
 	rm -v *.hex *.elf *.o dmp/*.dmp
 
