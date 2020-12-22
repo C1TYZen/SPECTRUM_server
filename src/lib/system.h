@@ -32,71 +32,24 @@
 #define CMD_CC	25443 // проверить соединение
 #define CMD_TP	28788 // тестирование пинов
 
-/***********************
- * USART
- ***********************/
-void USART_init();
-void USART_flush();
+//filter
+// #define CMD_FA  24934 // filter 1 0x6166
+// #define CMD_FB  25190 // filter 2 0x6266
+// #define CMD_FC  25446 // filter 3 0x6366
+// #define CMD_FD  25702 // filter 4 0x6466
+// #define CMD_FE  25958 // filter 5 0x6566
+// #define CMD_FF  26214 // filter 6 0x6666
 
-uint8_t USART_read();
-uint16_t USART_get();
-uint8_t USART_readnow();
-uint16_t USART_getmessage();
-void USART_readln(char* str);
+#define CMD_FA 0x6166
+#define CMD_FB 0x6266
+#define CMD_FC 0x6366
+#define CMD_FD 0x6466
+#define CMD_FE 0x6566
+#define CMD_FF 0x6666
 
-void USART_write(uint8_t data);
-void USART_send(uint16_t data);
-void USART_println(char* string);
-void USART_print(char* string);
-void USART_putbyteview(uint8_t data);
-
-/***********************
- * ADC
- ***********************/
-void ADC_init();
-uint16_t ADC_read(uint8_t ch);
-
-/***********************
- * DRIVER
- ***********************/
-#define DRIVER_INSTALLED_DIV 0
-#define DRIVER_BCK 1
-#define DIRVER_FWD -1
-
-typedef struct
-{
-	int EN;
-	int MS1;
-	int MS2;
-	int MS3;
-	int STEP;
-	int DIR;
-} driver_config;
-
-void DRIVER_init();
-void DRIVER_step();
-void DRIVER_chdir();
-void DRIVER_forward();
-void DRIVER_backward();
-int8_t DRIVER_setdir(int8_t dir);
-int8_t DRIVER_setdiv(uint8_t div);
-void DRIVER_mvf(uint32_t trg);
-void DRIVER_mvb(uint32_t trg);
-void DRIVER_moveto(uint32_t r1);
-uint32_t DRIVER_info();
-void DRIVER_reset();
-
-/***********************
- * PORTB
- ***********************/
-#define D8		PB0
-#define D9		PB1
-#define D10		PB2
-#define D11		PB3
-#define D12		PB4
-
-void PORTB_init();
-uint8_t PORTB_getpin(int pin);
-void PORTB_writepin(int pin, int bit);
-void PORTB_pinmod(int pin, int mod);
-uint8_t PORTB_test();
+// fa - 0x6166
+// fb - 0x6266
+// fc - 0x6366
+// fd - 0x6466
+// fe - 0x6566
+// ff - 0x6666

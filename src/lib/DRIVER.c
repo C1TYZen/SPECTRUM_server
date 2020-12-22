@@ -2,6 +2,7 @@
  * DRIVER
  ***********************/
 #include "system.h"
+#include "DRIVER.h"
 
 #define EN		PD2
 #define MS1		PD3
@@ -10,8 +11,8 @@
 #define STEP 	PD6
 #define DIR 	PD7
 
-#define CLOCKWISE 	| (1<<DIR)
-#define CCLOCKWISE 	& ~(1<<DIR)
+#define DRIVER_PORT PORTD
+#define DRIVER_DDR	DDRD
 
 uint32_t DRIVER_position = 0;
 int8_t DRIVER_dir = 1;
@@ -22,30 +23,30 @@ uint8_t DRIVER_div = 1;
  **/
 void DRIVER_init()
 {
-	DDRD |= (1<<EN)|(1<<MS1)|(1<<MS2)|(1<<MS3)|(1<<STEP)|(1<<DIR);
-	PORTD |= (1<<DIR); // Вперед
-	PORTD &= ~(8<<MS1);
-	PORTD |= (1<<MS1);
+	DRIVER_DDR |= (1<<EN)|(1<<MS1)|(1<<MS2)|(1<<MS3)|(1<<STEP)|(1<<DIR);
+	DRIVER_PORT |= (1<<DIR); // Вперед
+	DRIVER_PORT &= ~(8<<MS1);
+	DRIVER_PORT |= (1<<MS1);
 }
 
 // Шаг двигателя
 void DRIVER_step()
 {
-	PORTD ^= (1<<STEP);
+	DRIVER_PORT ^= (1<<STEP);
 	DRIVER_position += DRIVER_dir * (8/DRIVER_div);
 }
 
 // Направление двигателя вперед
 void DRIVER_forward()
 {
-	PORTD |= (1<<DIR);
+	DRIVER_PORT |= (1<<DIR);
 	DRIVER_dir = -1;
 }
 
 // Направление двигателя назад
 void DRIVER_backward()
 {
-	PORTD &= ~(1<<DIR);
+	DRIVER_PORT &= ~(1<<DIR);
 	DRIVER_dir = 1;
 }
 
@@ -53,19 +54,19 @@ int8_t DRIVER_setdir(int8_t dir)
 {
 	if(dir == 1) //back
 	{
-		PORTD &= ~(1<<DIR);
+		DRIVER_PORT &= ~(1<<DIR);
 		DRIVER_dir = 1;
 		return 1;
 	}
 	else if(dir == -1) //fwd
 	{
-		PORTD |= (1<<DIR);
+		DRIVER_PORT |= (1<<DIR);
 		DRIVER_dir = -1;
 		return 0;
 	}
 	else
 	{
-		PORTD &= ~(1<<DIR);
+		DRIVER_PORT &= ~(1<<DIR);
 		DRIVER_dir = 1;
 		return -1;
 	}
@@ -79,37 +80,37 @@ int8_t DRIVER_setdiv(uint8_t div)
 	// 1/16 не работает
 	if(div == 1)
 	{
-		PORTD &= ~(1<<MS1);
-		PORTD &= ~(1<<MS2);
-		PORTD &= ~(1<<MS3);
+		DRIVER_PORT &= ~(1<<MS1);
+		DRIVER_PORT &= ~(1<<MS2);
+		DRIVER_PORT &= ~(1<<MS3);
 		DRIVER_div = 1;
 	}
 	else if(div == 2)
 	{
-		PORTD |= (1<<MS1);
-		PORTD &= ~(1<<MS2);
-		PORTD &= ~(1<<MS3);
+		DRIVER_PORT |= (1<<MS1);
+		DRIVER_PORT &= ~(1<<MS2);
+		DRIVER_PORT &= ~(1<<MS3);
 		DRIVER_div = 2;
 	}
 	else if(div == 4)
 	{
-		PORTD &= ~(1<<MS1);
-		PORTD |= (1<<MS2);
-		PORTD &= ~(1<<MS3);
+		DRIVER_PORT &= ~(1<<MS1);
+		DRIVER_PORT |= (1<<MS2);
+		DRIVER_PORT &= ~(1<<MS3);
 		DRIVER_div = 4;
 	}
 	else if(div == 8)
 	{
-		PORTD |= (1<<MS1);
-		PORTD |= (1<<MS2);
-		PORTD &= ~(1<<MS3);
+		DRIVER_PORT |= (1<<MS1);
+		DRIVER_PORT |= (1<<MS2);
+		DRIVER_PORT &= ~(1<<MS3);
 		DRIVER_div = 8;
 	}
 	else
 	{
-		PORTD &= ~(1<<MS1);
-		PORTD &= ~(1<<MS2);
-		PORTD &= ~(1<<MS3);
+		DRIVER_PORT &= ~(1<<MS1);
+		DRIVER_PORT &= ~(1<<MS2);
+		DRIVER_PORT &= ~(1<<MS3);
 		DRIVER_div = 1;
 		div = 1;
 	}

@@ -1,7 +1,9 @@
 #ATmega168p makefile
 
 LIBPATH = src/lib/
-LIBOBJ = USART.o DRIVER.o ADC.o PORTB.o
+LIBOBJ = USART.o DRIVER.o ADC.o PORTB.o PORTD.o
+MAINOBJ = ADC.o DRIVER.o PORTB.o USART.o
+SLAVEOBJ = DRIVER.o PORTB.o PORTD.o USART.o
 
 GCCDEVICE=	atmega168p
 ADDEVICE = m168
@@ -51,6 +53,10 @@ PORTB.o: $(LIBPATH)PORTB.c
 	@echo "---PORTB.c---------------------------"
 	$(COMPILE) -c $(LIBPATH)PORTB.c
 
+PORTD.o: $(LIBPATH)PORTD.c
+	@echo "---PORTD.c---------------------------"
+	$(COMPILE) -c $(LIBPATH)PORTD.c
+
 #.dmp
 main.dmp: main.o
 	@echo "---main dump-----------------------"
@@ -75,16 +81,16 @@ PORTB.dmp: PORTB.o
 #.hex .elf
 main.elf: main.o USART.o DRIVER.o ADC.o PORTB.o
 	@echo "---.elf files----------------------"
-	$(COMPILE) -o main.elf main.o $(LIBOBJ)
+	$(COMPILE) -o main.elf main.o $(MAINOBJ)
 
 main.hex: main.elf
 	@echo "---.hex files----------------------"
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 	avr-size -C --mcu=$(GCCDEVICE) main.elf
 
-slave.elf: slave.o USART.o DRIVER.o PORTB.o
+slave.elf: slave.o USART.o DRIVER.o PORTB.o PORTD.o
 	@echo "---.elf files----------------------"
-	$(COMPILE) -o slave.elf slave.o $(LIBOBJ)
+	$(COMPILE) -o slave.elf slave.o $(SLAVEOBJ)
 
 slave.hex: slave.elf
 	@echo "---.hex files----------------------"

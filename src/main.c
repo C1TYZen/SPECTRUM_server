@@ -12,10 +12,21 @@
  * MAIN
  ***********************/
 #include "lib/system.h"
+#include "lib/ADC.h"
+#include "lib/DRIVER.h"
+#include "lib/PORTB.h"
+#include "lib/USART.h"
+
+#define SRF 	D10
 
 #define ENDER 	D8
 #define ROTOR 	D9
-#define SRF 	D10
+#define PIN_MOD_IN 	0
+#define PIN_MOD_OUT 1
+
+//FILTER
+#define NUM_MAX 6
+#define NUM_MIN 1
 
 /* Заготовка под человека
 typedef struct
@@ -62,25 +73,27 @@ void filter(int n)
 	// Читаем состояние линии (в неактивном состоянии оба контроллера
 	// настраивают линию на "вход" и подтягивают к +5В)
 	int SRFS = PORTB_getpin(SRF);
+	int k = 0;
 
 	//Если нога подтянута к земле со стороны БС(блока светофильтров), 
 	//то значит он занят - ничего не предпринимаем...
-	if (SRFS == 0) {
+	if (SRFS == 0)
 		return;
-	}
 	// ...иначе опускаем вывод, сообщая светофильтру, 
-	// что сейчас будет  передоваться команда
+	// что сейчас будет  передаваться команда
 	PORTB_writepin(SRF, 0);
 	PORTB_pinmod(SRF, 1);
 	_delay_ms(2);
 	// В цикле передаем команду
-	int k = 0;
 	for (k = 1; k <= 6; k++)
 	{
-		if (n > 0) {
+		if (n > 0) 
+		{
 			PORTB_writepin(SRF, 1);
 			n--;
-		} else {
+		} 
+		else 
+		{
 			PORTB_writepin(SRF, 0);
 		}
 		_delay_ms(2);

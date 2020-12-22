@@ -2,6 +2,7 @@
  * USART
  ***********************/
 #include "system.h"
+#include "USART.h"
 
 #define F_CPU 16000000
 // Скорость обмена данными по USART в бит/с
