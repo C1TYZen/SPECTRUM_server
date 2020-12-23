@@ -3,7 +3,7 @@
 LIBPATH = src/lib/
 LIBOBJ = USART.o DRIVER.o ADC.o PORTB.o PORTD.o
 MAINOBJ = ADC.o DRIVER.o PORTB.o USART.o
-SLAVEOBJ = DRIVER.o PORTB.o PORTD.o USART.o
+FILTEROBJ = DRIVER.o PORTB.o PORTD.o USART.o
 
 GCCDEVICE=	atmega168p
 ADDEVICE = m168
@@ -17,9 +17,9 @@ help:
 	@echo "This Makefile has no default rule. Use one of the following:"
 	@echo "    make obj ....... build .o files"
 	@echo "    make main ...... build main"
-	@echo "    make slave ..... build filter_slave"
+	@echo "    make filter ..... build filter"
 	@echo "    make uplmain ... upload main"
-	@echo "    make uplslave .. upload filter_slave"
+	@echo "    make uplfilter .. upload filter"
 	@echo "    ......."
 	@echo "    make cln ....... delete object and hex files"
 	@echo "    make clnhex .... delete hex files"
@@ -32,9 +32,9 @@ main.o: src/main.c
 	@echo "---main.c--------------------------"
 	$(COMPILE) -c src/main.c
 
-slave.o: src/slave.c
-	@echo "---slave.c--------------------------"
-	$(COMPILE) -c src/slave.c
+filter.o: src/filter.c
+	@echo "---filter.c--------------------------"
+	$(COMPILE) -c src/filter.c
 
 #lib
 USART.o: $(LIBPATH)USART.c
@@ -88,29 +88,29 @@ main.hex: main.elf
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 	avr-size -C --mcu=$(GCCDEVICE) main.elf
 
-slave.elf: slave.o USART.o DRIVER.o PORTB.o PORTD.o
+filter.elf: filter.o USART.o DRIVER.o PORTB.o PORTD.o
 	@echo "---.elf files----------------------"
-	$(COMPILE) -o slave.elf slave.o $(SLAVEOBJ)
+	$(COMPILE) -o filter.elf filter.o $(FILTEROBJ)
 
-slave.hex: slave.elf
+filter.hex: filter.elf
 	@echo "---.hex files----------------------"
-	avr-objcopy -j .text -j .data -O ihex slave.elf slave.hex
-	avr-size -C --mcu=$(GCCDEVICE) slave.elf
+	avr-objcopy -j .text -j .data -O ihex filter.elf filter.hex
+	avr-size -C --mcu=$(GCCDEVICE) filter.elf
 
 #-------------
 #commands-----
 #-------------
-obj: main.o slave.o $(LIBOBJ)
+obj: main.o filter.o $(LIBOBJ)
 
 main: main.hex
 
-slave: slave.hex
+filter: filter.hex
 
 uplmain: main.hex
 	$(AVRDUDE) -U flash:w:main.hex:i
 
-uplslave: slave.hex
-	$(AVRDUDE) -U flash:w:slave.hex:i
+uplfilter: filter.hex
+	$(AVRDUDE) -U flash:w:filter.hex:i
 
 sze: main.elf
 	avr-size -C --mcu=$(GCCDEVICE) main.elf

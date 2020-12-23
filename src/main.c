@@ -68,23 +68,11 @@ void mesure(uint32_t st, uint16_t mc)
 	USART_send(CMD_MS);
 }
 
-void filter(int n) 
+void filter(int n)
 {
-	// Читаем состояние линии (в неактивном состоянии оба контроллера
-	// настраивают линию на "вход" и подтягивают к +5В)
-	int SRFS = PORTB_getpin(SRF);
 	int k = 0;
+	PORTB_writepin(SRF, 1);
 
-	//Если нога подтянута к земле со стороны БС(блока светофильтров), 
-	//то значит он занят - ничего не предпринимаем...
-	if (SRFS == 0)
-		return;
-	// ...иначе опускаем вывод, сообщая светофильтру, 
-	// что сейчас будет  передаваться команда
-	PORTB_writepin(SRF, 0);
-	PORTB_pinmod(SRF, 1);
-	_delay_ms(2);
-	// В цикле передаем команду
 	for (k = 1; k <= 6; k++)
 	{
 		if (n > 0) 
@@ -96,16 +84,13 @@ void filter(int n)
 		{
 			PORTB_writepin(SRF, 0);
 		}
-		_delay_ms(2);
+		_delay_ms(50);
 	}
-	// Настраиваем вывод на вход по окончанию передачи
-	PORTB_pinmod(SRF, 0);
-	_delay_ms(300);
-	// Записываем состояние фильтра
-	return n;
+	PORTB_writepin(SRF, 0);
 }
 
-int main() {
+int main()
+{
 	uint16_t command = 0;
 	uint16_t cfg_mesure_start;
 	uint16_t cfg_steps = 100;
@@ -129,6 +114,9 @@ int main() {
 	ADC_init();
 	DRIVER_init();
 	PORTB_init();
+
+	PORTB_pinmod(D10, 1);
+	PORTB_writepin(D10, 0);
 	
 	while(1) {
 		command = USART_get();
@@ -239,6 +227,32 @@ int main() {
 		{
 			//USART_println("OLD WORLD NEWS");
 			USART_println("**Connected**");
+		}
+
+		//FILTER
+		if(command == CMD_FA)
+		{
+			filter(1);
+		}
+		if(command == CMD_FB)
+		{
+			filter(2);
+		}
+		if(command == CMD_FC)
+		{
+			filter(3);
+		}
+		if(command == CMD_FD)
+		{
+			filter(4);
+		}
+		if(command == CMD_FE)
+		{
+			filter(5);
+		}
+		if(command == CMD_FF)
+		{
+			filter(6);
 		}
 
 		command = 0;

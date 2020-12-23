@@ -6,7 +6,7 @@
 
 #define F_CPU 16000000
 // Скорость обмена данными по USART в бит/с
-// 76800 подобрано по таблице /papers/AVR Baud Rate Tables.htm
+// 76800 подобрано по таблице /SPECTRUM_stuff/AVR Baud Rate Tables.htm
 #define BAUDRATE 76800
 // Значение регистра UBRR0, соответствующее выбранной скорости
 #define BAUD_PRESCALLER (((F_CPU / (BAUDRATE * 16UL))) - 1)

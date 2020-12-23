@@ -82,7 +82,8 @@ void filter_position()
 	}
 }
 
-void main() {
+void main()
+{
 	driver_config drv_cfg = 
 	{
 		.EN = 	PD2,
@@ -94,52 +95,54 @@ void main() {
 	};
 
 	DRIVER_init();
-	//USART_init();
 	PORTB_init();
 	PORTD_init();
+	USART_init();
 
-	PORTB_pinmod(PWR_sens, 1);
-	PORTB_pinmod(GND_sens, 1);
-	PORTB_writepin(PWR_sens, 1);
-	PORTB_writepin(GND_sens, 0);
+	PORTD_pinmod(PWR_sens, 1);
+	PORTD_pinmod(GND_sens, 1);
+	PORTD_writepin(PWR_sens, 1);
+	PORTD_writepin(GND_sens, 0);
 
-	PORTB_pinmod(sens_0, 0);
-	PORTB_pinmod(sens_c, 0);
-	PORTB_pinmod(SRF, 0);
+	PORTD_pinmod(sens_0, 0);
+	PORTD_pinmod(sens_c, 0);
+
+	PORTD_pinmod(SRF, 0);
 
 	zero_position();
 
 	int comand_reg = 1;
-	int SRFS;
+	uint8_t SRFS = 1;
 	int k = 0;
 
 	while(1)
 	{
-		SRFS = PORTB_getpin(SRF);
+		SRFS = PORTD_getpin(SRF);
 
-		//считывание номера позиции
-		if(SRFS == 0)
+		if(SRFS == 1)
 		{
-			_delay_ms(1);
-			comand_reg = 0;
-			for(k = 1; k <= 6 ; k++)
+			SRFS = 0;
+			_delay_ms(2);
+			for (k = 1; k <= 6; k++)
 			{
-				_delay_ms(2);
-				SRFS = PORTB_getpin(SRF);
-				if(SRFS == 1)
-					comand_reg++;
+				SRFS += PORTD_getpin(SRF);
+				_delay_ms(50);
 			}
 
-			//ожидание конца передачи
-			SRFS = PORTB_getpin(SRF);
-			while(SRFS == 0)
-				SRFS = PORTB_getpin(SRF);
-			
-			PORTB_writepin(SRF,0);
-			PORTB_pinmod(SRF, 1); 
+			char s[10];
+			sprintf(s, "%d", SRFS);
+			USART_println(s);
+			SRFS = 1;
+			_delay_ms(200);
+		}
+
+		/*
 			num = comand_reg;
 			filter_position();
 			PORTB_pinmod(SRF, 0);
-		}
+			char str[20];
+			sprintf(str, "%d %d", num, pos);
+			USART_println(str);
+		*/
 	}
 }
