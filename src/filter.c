@@ -99,10 +99,12 @@ void main()
 	PORTD_init();
 	USART_init();
 
+	//****
 	PORTD_pinmod(PWR_sens, 1);
 	PORTD_pinmod(GND_sens, 1);
 	PORTD_writepin(PWR_sens, 1);
 	PORTD_writepin(GND_sens, 0);
+	//****
 
 	PORTD_pinmod(sens_0, 0);
 	PORTD_pinmod(sens_c, 0);
@@ -133,16 +135,9 @@ void main()
 			sprintf(s, "%d", SRFS);
 			USART_println(s);
 			SRFS = 1;
+			
+			filter_position();
 			_delay_ms(200);
 		}
-
-		/*
-			num = comand_reg;
-			filter_position();
-			PORTB_pinmod(SRF, 0);
-			char str[20];
-			sprintf(str, "%d %d", num, pos);
-			USART_println(str);
-		*/
 	}
 }
