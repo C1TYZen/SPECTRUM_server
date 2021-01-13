@@ -68,7 +68,7 @@ void mesure(uint32_t st, uint16_t mc)
 	USART_send(CMD_MS);
 }
 
-void filter(int n)
+void filter(int n) //Не трогай, работает.
 {
 	int k = 0;
 	PORTB_writepin(SRF, 1);
@@ -98,16 +98,6 @@ int main()
 	uint8_t cfg_filter = 0;
 	uint8_t cfg_div = 1;
 	uint8_t cfg_dir = 1;
-
-	driver_config drv_cfg = 
-	{
-		.EN = PD2,
-		.MS1 = PD3,
-		.MS2 = PD4,
-		.MS3 = PD5,
-		.STEP = PD6,
-		.DIR = PD7
-	};
 
 	// Зааааапущаем все библиотеки
 	USART_init();

@@ -38,3 +38,35 @@
 #define CMD_FE  0x6566 // filter 5
 #define CMD_FF  0x6666 // filter 6
 #define CMD_FG 	0x6766 // filter zero position
+
+#define PINMOD_IN   0
+#define PINMOD_OUT  1
+
+#define D2 		PD2
+#define D3 		PD3
+#define D4 		PD4
+#define D5 		PD5
+#define D6 		PD6
+#define D7 		PD7
+#define D8		PB0
+#define D9		PB1
+#define D10		PB2
+#define D11		PB3
+#define D12		PB4
+
+// #define D2 		1
+// #define D3 		2
+// #define D4 		3
+// #define D5 		4
+// #define D6 		5
+// #define D7 		6
+// #define D8		7
+// #define D9		8
+// #define D10		9
+// #define D11		10
+// #define D12		11
+
+void ports_init();
+uint8_t getpin(int pin);
+void writepin(int pin, int bit);
+void pinmod(int pin, int mod);

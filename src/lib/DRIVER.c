@@ -4,16 +4,6 @@
 #include "system.h"
 #include "DRIVER.h"
 
-#define EN		PD2
-#define MS1		PD3
-#define MS2		PD4
-#define MS3		PD5
-#define STEP 	PD6
-#define DIR 	PD7
-
-#define DRIVER_PORT PORTD
-#define DRIVER_DDR	DDRD
-
 uint32_t DRIVER_position = 0;
 int8_t DRIVER_dir = 1;
 uint8_t DRIVER_div = 1;
@@ -36,6 +26,7 @@ void DRIVER_step()
 	DRIVER_position += DRIVER_dir * (8/DRIVER_div);
 }
 
+// Смотреть со стороны приборной панели
 // Направление двигателя вперед
 void DRIVER_forward()
 {
@@ -49,6 +40,23 @@ void DRIVER_backward()
 	DRIVER_PORT &= ~(1<<DIR);
 	DRIVER_dir = 1;
 }
+//////////////////////////////////////
+
+// Смотреть со стороны крепления ротора
+// Направление вращения вправо
+void DRIVER_dexter()
+{
+	DRIVER_PORT &= ~(1<<DIR);
+	DRIVER_dir = 1;
+}
+
+// Направление врщения влево
+void DRIVER_sinister()
+{
+	DRIVER_PORT |= (1<<DIR);
+	DRIVER_dir = -1;
+}
+//////////////////////////////////////
 
 int8_t DRIVER_setdir(int8_t dir)
 {

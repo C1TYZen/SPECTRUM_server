@@ -4,16 +4,22 @@
 #include "lib/PORTD.h"
 #include "lib/USART.h"
 
-#define PWR_sens	D8       
-#define GND_sens	D9 
+#define DIR 	PD3
+#define STEP 	PD4
+#define MS3		PD7
+#define MS2		PB0
+#define MS1		PB1
+#define EN		PB2
 
-#define sens_0		D10	//датчик нулевого положения
-#define sens_c		D11	//датчик текущего положения
+#define PWR_sens	D5
+#define GND_sens	D6
+
+#define sens_0		D11	//датчик нулевого положения
+#define sens_c		D12	//датчик текущего положения
 
 #define SRF 		D2
 
-volatile unsigned int num = 0;
-volatile unsigned int pos = 0;
+int pos = 0;
 
 void step(int steps)
 {
@@ -24,9 +30,9 @@ void step(int steps)
 		for(i = 0; i < steps; i++)
 			DRIVER_step();
 	}
-	else
+	if(steps < 0)
 	{
-		steps = abs(steps);
+		steps *= -1;
 		DRIVER_forward();
 		for(i = 0; i < steps; i++)
 			DRIVER_step();
@@ -35,22 +41,19 @@ void step(int steps)
 			
 void zero_position()
 {
-	DRIVER_backward();
 	_delay_ms(1500);
+	DRIVER_backward();
 	if(PORTB_getpin(sens_0) == 0)
-	{
 		step(1500);
-	}
+
 	while(PORTB_getpin(sens_0) == 1)
-	{
 		step(1);
-	}
-	num = 1;   
+		
 	pos = 1;
 	_delay_ms(1000);
 }
 
-void filter_position()
+void filter_position(int num)
 {
 	while(pos != num)
 	{
@@ -58,11 +61,9 @@ void filter_position()
 		{
 			while(pos > num)
 			{
-				step(-800);
-				while((pos > num) && (PORTB_getpin(sens_c) == 1))
-				{
+				step(-800); //Чо здесь происходит 0_о
+				while(PORTB_getpin(sens_c) == 1)
 					step(-1);
-				}
 				pos--;
 			}
 			step(-100); 
@@ -71,11 +72,9 @@ void filter_position()
 		{
 			while(pos < num)
 			{
-				step(1000);
-				while((pos < num) && (PORTB_getpin(sens_c) == 1))
-				{
+				step(1000); //А здесь почему тыща шагов?
+				while(PORTB_getpin(sens_c) == 1)
 					step(1);
-				}
 				pos++;
 			}
 		}
@@ -84,24 +83,14 @@ void filter_position()
 
 void main()
 {
-	driver_config drv_cfg = 
-	{
-		.EN = 	PD2,
-		.MS1 = 	PD3,
-		.MS2 = 	PD4,
-		.MS3 = 	PD5,
-		.STEP = PD6,
-		.DIR = 	PD7
-	};
-
 	DRIVER_init();
 	PORTB_init();
 	PORTD_init();
 	USART_init();
 
-	//****
-	PORTD_pinmod(PWR_sens, 1);
-	PORTD_pinmod(GND_sens, 1);
+	//**** Какое то питание
+	PORTD_pinmod(PWR_sens, PINMOD_OUT);
+	PORTD_pinmod(GND_sens, PINMOD_OUT);
 	PORTD_writepin(PWR_sens, 1);
 	PORTD_writepin(GND_sens, 0);
 	//****
@@ -113,9 +102,7 @@ void main()
 
 	zero_position();
 
-	int comand_reg = 1;
 	uint8_t SRFS = 1;
-	int k = 0;
 
 	while(1)
 	{
@@ -123,21 +110,22 @@ void main()
 
 		if(SRFS == 1)
 		{
-			SRFS = 0;
 			_delay_ms(2);
-			for (k = 1; k <= 6; k++)
+			SRFS = 0;
+			int i = 1;
+			for(; i <= 6; i++)
 			{
 				SRFS += PORTD_getpin(SRF);
 				_delay_ms(50);
 			}
 
-			char s[10];
-			sprintf(s, "%d", SRFS);
-			USART_println(s);
-			SRFS = 1;
+			// char s[10];
+			// sprintf(s, "%d", SRFS);
+			// USART_println(s);
 			
-			filter_position();
-			_delay_ms(200);
+			filter_position(SRFS);
+			SRFS = 0;
+			_delay_ms(200); //Чтобы последний бит не вызывал еще одну итерацию
 		}
 	}
 }

@@ -1,12 +1,6 @@
 /***********************
  * PORTB
  ***********************/
-#define D8		PB0
-#define D9		PB1
-#define D10		PB2
-#define D11		PB3
-#define D12		PB4
-
 void PORTB_init();
 
 uint8_t PORTB_getpin(int pin);
