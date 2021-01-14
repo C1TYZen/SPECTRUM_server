@@ -2,8 +2,8 @@
  * USART
  ***********************/
 void USART_init();
-void USART_flush();
 
+void USART_flush();
 uint8_t USART_read();
 uint16_t USART_get();
 uint8_t USART_readnow();

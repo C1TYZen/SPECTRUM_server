@@ -1,9 +1,9 @@
 #ATmega168p makefile
 
 LIBPATH = src/lib/
-LIBOBJ =  ADC.o DRIVER.o PORTB.o PORTD.o USART.o
-MAINOBJ = ADC.o DRIVER.o PORTB.o USART.o
-FILTEROBJ = DRIVER.o PORTB.o PORTD.o USART.o
+LIBOBJ =  ADC.o DRIVER.o PORTB.o PORTD.o USART.o system.o
+MAINOBJ = ADC.o DRIVER.o PORTB.o PORTD.o USART.o system.o
+FILTEROBJ = DRIVER.o PORTB.o PORTD.o USART.o system.o
 
 GCCDEVICE=	atmega168p
 ADDEVICE = m168
@@ -57,6 +57,10 @@ PORTD.o: $(LIBPATH)PORTD.c
 USART.o: $(LIBPATH)USART.c
 	@echo "---USART.c-------------------------"
 	$(COMPILE) -c $(LIBPATH)USART.c
+
+system.o: $(LIBPATH)system.c
+	@echo "---system.c------------------------"
+	$(COMPILE) -c $(LIBPATH)system.c
 
 #.dmp
 main.dmp: main.o

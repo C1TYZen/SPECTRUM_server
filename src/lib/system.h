@@ -42,31 +42,35 @@
 #define PINMOD_IN   0
 #define PINMOD_OUT  1
 
-#define D2 		PD2
-#define D3 		PD3
-#define D4 		PD4
-#define D5 		PD5
-#define D6 		PD6
-#define D7 		PD7
-#define D8		PB0
-#define D9		PB1
-#define D10		PB2
-#define D11		PB3
-#define D12		PB4
+//Порты
 
-// #define D2 		1
-// #define D3 		2
-// #define D4 		3
-// #define D5 		4
-// #define D6 		5
-// #define D7 		6
-// #define D8		7
-// #define D9		8
-// #define D10		9
-// #define D11		10
-// #define D12		11
+// D2 	    PD2
+// D3 	    PD3
+// D4 	    PD4
+// D5 	    PD5
+// D6 	    PD6
+// D7 	    PD7
+// D8	    PB0
+// D9	    PB1
+// D10	    PB2
+// D11	    PB3
+// D12	    PB4
+
+#define D2 		2
+#define D3 		3
+#define D4 		4
+#define D5 		5
+#define D6 		6
+#define D7 		7
+#define D8		8
+#define D9		9
+#define D10		10
+#define D11		11
+#define D12		12
 
 void ports_init();
-uint8_t getpin(int pin);
-void writepin(int pin, int bit);
-void pinmod(int pin, int mod);
+
+uint8_t ports_getpin(int pin);
+void ports_writepin(int pin, int bit);
+void ports_switch(int pin);
+void ports_pinmod(int pin, int mod);

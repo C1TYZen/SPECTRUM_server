@@ -1,15 +1,13 @@
 #include "lib/system.h"
 #include "lib/DRIVER.h"
-#include "lib/PORTB.h"
-#include "lib/PORTD.h"
 #include "lib/USART.h"
 
-#define DIR 	PD3
-#define STEP 	PD4
-#define MS3		PD7
-#define MS2		PB0
-#define MS1		PB1
-#define EN		PB2
+// #define DIR 		PD3
+// #define STEP 	PD4
+// #define MS3		PD7
+// #define MS2		PB0
+// #define MS1		PB1
+// #define EN		PB2
 
 #define PWR_sens	D5
 #define GND_sens	D6
@@ -83,9 +81,8 @@ void filter_position(int num)
 
 void main()
 {
-	DRIVER_init();
-	PORTB_init();
-	PORTD_init();
+	ports_init();
+	DRIVER_init(D3, D4, D5, D6, D7, D8);
 	USART_init();
 
 	//**** Какое то питание

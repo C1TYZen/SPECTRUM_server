@@ -1,30 +1,41 @@
 #include "system.h"
-#include "PORTB.h"
 #include "PORTD.h"
+#include "PORTB.h"
 
 void ports_init()
 {
-	PORTB_init();
 	PORTD_init();
+	PORTB_init();
 }
 
 uint8_t ports_getpin(int pin)
 {
-	
+	if(pin<8)
+		PORTD_getpin(pin);
+	else
+		PORTB_getpin(pin-8);
 }
 
 void ports_writepin(int pin, int bit)
 {
-	if(bit == 1)
-		PORTD |= (1<<pin);
-	if(bit == 0)
-		PORTD &= ~(1<<pin);
+	if(pin<8)
+		PORTD_writepin(pin, bit);
+	else
+		PORTB_writepin(pin-8, bit);
+}
+
+void ports_switch(int pin)
+{
+	if(pin<8)
+		PORTD_switchpin(pin);
+	else
+		PORTB_switchpin(pin-8);
 }
 
 void ports_pinmod(int pin, int mod)
 {
-	if(mod == 1)
-		DDRD |= (1<<pin);
-	if(mod == 0)
-		DDRD &= ~(1<<pin);
+	if(pin<8)
+		PORTD_pinmod(pin, mod);
+	else
+		PORTB_pinmod(pin-8, mod);
 }

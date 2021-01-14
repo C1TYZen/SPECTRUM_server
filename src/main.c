@@ -14,7 +14,6 @@
 #include "lib/system.h"
 #include "lib/ADC.h"
 #include "lib/DRIVER.h"
-#include "lib/PORTB.h"
 #include "lib/USART.h"
 
 #define SRF 	D10
@@ -71,22 +70,22 @@ void mesure(uint32_t st, uint16_t mc)
 void filter(int n) //Не трогай, работает.
 {
 	int k = 0;
-	PORTB_writepin(SRF, 1);
+	ports_writepin(SRF, 1);
 
 	for (k = 1; k <= 6; k++)
 	{
 		if (n > 0) 
 		{
-			PORTB_writepin(SRF, 1);
+			ports_writepin(SRF, 1);
 			n--;
 		} 
 		else 
 		{
-			PORTB_writepin(SRF, 0);
+			ports_writepin(SRF, 0);
 		}
 		_delay_ms(50);
 	}
-	PORTB_writepin(SRF, 0);
+	ports_writepin(SRF, 0);
 }
 
 int main()
@@ -100,13 +99,13 @@ int main()
 	uint8_t cfg_dir = 1;
 
 	// Зааааапущаем все библиотеки
-	USART_init();
+	ports_init();
 	ADC_init();
-	DRIVER_init();
-	PORTB_init();
+	USART_init();
+	DRIVER_init(D2, D3, D4, D5, D6, D7);
 
-	PORTB_pinmod(D10, 1);
-	PORTB_writepin(D10, 0);
+	ports_pinmod(D10, 1);
+	ports_writepin(D10, 0);
 	
 	while(1) {
 		command = USART_get();
@@ -181,7 +180,7 @@ int main()
 
 			DRIVER_backward();
 			DRIVER_setdiv(8);
-			while(PORTB_getpin(ROTOR))
+			while(ports_getpin(ROTOR))
 			{
 				_delay_ms(1.4);
 				USART_print("Rotor");
@@ -194,11 +193,11 @@ int main()
 		//TEST
 		if(command == CMD_TP)
 		{
-			if(PORTB_getpin(ENDER))
+			if(ports_getpin(ENDER))
 				USART_println("Ender 1");
 			else
 				USART_println("Ender 0");
-			if(PORTB_getpin(ROTOR))
+			if(ports_getpin(ROTOR))
 				USART_println("Rotor 1");
 			else
 				USART_println("Rotor 0");

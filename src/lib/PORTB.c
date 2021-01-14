@@ -26,6 +26,11 @@ void PORTB_writepin(int pin, int bit)
 		PORTB &= ~(1<<pin);
 }
 
+void PORTB_switchpin(int pin)
+{
+	PORTB ^= (1<<pin);
+}
+
 void PORTB_pinmod(int pin, int mod)
 {
 	if(mod == 1)
