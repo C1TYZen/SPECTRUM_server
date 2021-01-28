@@ -9,120 +9,131 @@
 // #define MS1		PB1
 // #define EN		PB2
 
-#define PWR_sens	D5
-#define GND_sens	D6
+#define MCMD_PIN	D2
+#define DIR_PIN		D3
+#define STEP_PIN	D4
 
-#define sens_0		D11	//датчик нулевого положения
-#define sens_c		D12	//датчик текущего положения
+#define SENS_PWR	D5
+#define SENS_GND	D6
 
-#define SRF 		D2
+#define MS3_PIN		D7
+#define MS2_PIN		D8
+#define MS1_PIN		D9
+#define EN_PIN		D10
 
-int pos = 0;
+#define SENS_0		D11	//датчик нулевого положения
+#define SENS_C		D12	//датчик текущего положения
 
 void step(int steps)
 {
 	int i = 0;
-	if(steps > 0)
+	
+	DRIVER_forward();
+	for(i = 0; i < steps; i++)
 	{
-		DRIVER_backward();
-		for(i = 0; i < steps; i++)
-			DRIVER_step();
+		DRIVER_step();
+		_delay_ms(2);
 	}
-	if(steps < 0)
-	{
-		steps *= -1;
-		DRIVER_forward();
-		for(i = 0; i < steps; i++)
-			DRIVER_step();
-	}  
 }
 			
 void zero_position()
 {
-	_delay_ms(1500);
-	DRIVER_backward();
-	if(PORTB_getpin(sens_0) == 0)
-		step(1500);
+	ports_writepin(EN_PIN, 0);
+	_delay_ms(1);
 
-	while(PORTB_getpin(sens_0) == 1)
+	while(ports_getpin(SENS_0) == 1)
 		step(1);
 		
-	pos = 1;
-	_delay_ms(1000);
+	_delay_ms(1);
+	ports_writepin(EN_PIN, 1);
 }
 
-void filter_position(int num)
+void filter_position(int pos, int num)
 {
-	while(pos != num)
+	int i;
+	ports_writepin(EN_PIN, 0);
+	_delay_ms(1);
+
+	if(pos < num)
 	{
-		if(pos > num)
-		{
-			while(pos > num)
-			{
-				step(-800); //Чо здесь происходит 0_о
-				while(PORTB_getpin(sens_c) == 1)
-					step(-1);
-				pos--;
-			}
-			step(-100); 
-		}
-		else
-		{
-			while(pos < num)
-			{
-				step(1000); //А здесь почему тыща шагов?
-				while(PORTB_getpin(sens_c) == 1)
-					step(1);
-				pos++;
-			}
-		}
+		num -= pos;
 	}
+	else
+	{
+		num += 6 - pos;
+	}
+
+	for(i = 0; i < num; i++)
+	{
+		step(100);
+		while(ports_getpin(SENS_C) == 1)
+			step(1);
+	}
+
+	_delay_ms(1);		
+	ports_writepin(EN_PIN, 1);
 }
 
 void main()
 {
 	ports_init();
-	DRIVER_init(D3, D4, D5, D6, D7, D8);
+	DRIVER_init(EN_PIN, MS1_PIN, MS2_PIN, MS3_PIN, STEP_PIN, DIR_PIN);
 	USART_init();
 
-	//**** Какое то питание
-	PORTD_pinmod(PWR_sens, PINMOD_OUT);
-	PORTD_pinmod(GND_sens, PINMOD_OUT);
-	PORTD_writepin(PWR_sens, 1);
-	PORTD_writepin(GND_sens, 0);
-	//****
+	ports_pinmod(SENS_PWR, PINMOD_OUT);
+	ports_pinmod(SENS_GND, PINMOD_OUT);
 
-	PORTD_pinmod(sens_0, 0);
-	PORTD_pinmod(sens_c, 0);
+	ports_writepin(SENS_PWR, 1);
+	ports_writepin(SENS_GND, 0);
 
-	PORTD_pinmod(SRF, 0);
+	ports_pinmod(SENS_0, PINMOD_IN);
+	ports_pinmod(SENS_C, PINMOD_IN);
+
+	ports_pinmod(MCMD_PIN, PINMOD_IN);
+
+	ports_writepin(EN_PIN, 1);
 
 	zero_position();
-
-	uint8_t SRFS = 1;
+	int pos = 1;
+	uint8_t cmd = 0;
 
 	while(1)
 	{
-		SRFS = PORTD_getpin(SRF);
+		cmd = ports_getpin(MCMD_PIN);
 
-		if(SRFS == 1)
+		if(cmd == 1)
 		{
 			_delay_ms(2);
-			SRFS = 0;
+			cmd = 0;
 			int i = 1;
-			for(; i <= 6; i++)
+			for(; i <= 7; i++)
 			{
-				SRFS += PORTD_getpin(SRF);
+				cmd += ports_getpin(MCMD_PIN);
 				_delay_ms(50);
 			}
 
-			// char s[10];
-			// sprintf(s, "%d", SRFS);
-			// USART_println(s);
+			ports_pinmod(MCMD_PIN, PINMOD_OUT);
+			ports_writepin(MCMD_PIN, 0);
 			
-			filter_position(SRFS);
-			SRFS = 0;
+			if(cmd == 7)
+			{
+				zero_position();
+				pos = 1;
+			}
+			else
+			{
+				filter_position(pos, cmd);
+				pos = cmd;
+			}
+			
+			char s[10];
+			sprintf(s, "%d", cmd);
+			USART_println(s);
+			
+			cmd = 0;
+			ports_writepin(MCMD_PIN, 1);
 			_delay_ms(200); //Чтобы последний бит не вызывал еще одну итерацию
+			ports_pinmod(MCMD_PIN, PINMOD_IN);
 		}
 	}
 }

@@ -37,24 +37,21 @@
 #define CMD_FD  0x6466 // filter 4
 #define CMD_FE  0x6566 // filter 5
 #define CMD_FF  0x6666 // filter 6
-#define CMD_FG 	0x6766 // filter zero position
-
-#define PINMOD_IN   0
-#define PINMOD_OUT  1
+#define CMD_FZ 	0x7a66 // filter zero position
 
 //Порты
 
-// D2 	    PD2
-// D3 	    PD3
-// D4 	    PD4
-// D5 	    PD5
-// D6 	    PD6
-// D7 	    PD7
-// D8	    PB0
-// D9	    PB1
-// D10	    PB2
-// D11	    PB3
-// D12	    PB4
+// D2 		PD2
+// D3 		PD3
+// D4 		PD4
+// D5 		PD5
+// D6 		PD6
+// D7 		PD7
+// D8		PB0
+// D9		PB1
+// D10		PB2
+// D11		PB3
+// D12		PB4
 
 #define D2 		2
 #define D3 		3
@@ -67,6 +64,9 @@
 #define D10		10
 #define D11		11
 #define D12		12
+
+#define PINMOD_IN	0
+#define PINMOD_OUT	1
 
 void ports_init();
 

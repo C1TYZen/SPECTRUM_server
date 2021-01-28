@@ -1,7 +1,7 @@
-#ATmega168p makefile
+# ATmega168p makefile
 
 LIBPATH = src/lib/
-LIBOBJ =  ADC.o DRIVER.o PORTB.o PORTD.o USART.o system.o
+LIBOBJ = ADC.o DRIVER.o PORTB.o PORTD.o USART.o system.o
 MAINOBJ = ADC.o DRIVER.o PORTB.o PORTD.o USART.o system.o
 FILTEROBJ = DRIVER.o PORTB.o PORTD.o USART.o system.o
 

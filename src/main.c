@@ -6,7 +6,7 @@
 		выполнить действие()
 		отправить_строку_подтверждения()
 	}
- */
+*/
 
 /***********************
  * MAIN
@@ -16,27 +16,15 @@
 #include "lib/DRIVER.h"
 #include "lib/USART.h"
 
-#define SRF 	D10
-
-#define ENDER 	D8
-#define ROTOR 	D9
-#define PIN_MOD_IN 	0
-#define PIN_MOD_OUT 1
-
-//FILTER
-#define NUM_MAX 6
-#define NUM_MIN 1
-
-/* Заготовка под человека
-typedef struct
-{
-	uint16_t start;
-	uint16_t steps;
-	uint16_t mps;
-	uint8_t div;
-	uint8_t dir;
-} config_info;
-*/
+#define EN_PIN		D2
+#define MS1_PIN		D3
+#define MS2_PIN		D4
+#define MS3_PIN		D5
+#define STEP_PIN	D6
+#define DIR_PIN		D7
+#define ENDER_PIN	D8
+#define ROTOR_PIN	D9
+#define SCMD_PIN	D10
 
 void mesure(uint32_t st, uint16_t mc)
 {
@@ -61,7 +49,7 @@ void mesure(uint32_t st, uint16_t mc)
 		DRIVER_step();
 		st--;
 		_delay_ms(1.4);
-		// 1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
+		//1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
 	}
 	USART_flush();
 	USART_send(CMD_MS);
@@ -70,22 +58,27 @@ void mesure(uint32_t st, uint16_t mc)
 void filter(int n) //Не трогай, работает.
 {
 	int k = 0;
-	ports_writepin(SRF, 1);
+	ports_writepin(SCMD_PIN, 1);
 
-	for (k = 1; k <= 6; k++)
+	for (k = 1; k <= 7; k++)
 	{
 		if (n > 0) 
 		{
-			ports_writepin(SRF, 1);
+			ports_writepin(SCMD_PIN, 1);
 			n--;
 		} 
 		else 
 		{
-			ports_writepin(SRF, 0);
+			ports_writepin(SCMD_PIN, 0);
 		}
 		_delay_ms(50);
 	}
-	ports_writepin(SRF, 0);
+	ports_pinmod(SCMD_PIN, PINMOD_IN);
+	_delay_ms(50);
+	while(ports_getpin(SCMD_PIN) == 0) {}
+	USART_println("OK");
+	ports_pinmod(SCMD_PIN, PINMOD_OUT);
+	ports_writepin(SCMD_PIN, 0);
 }
 
 int main()
@@ -98,14 +91,14 @@ int main()
 	uint8_t cfg_div = 1;
 	uint8_t cfg_dir = 1;
 
-	// Зааааапущаем все библиотеки
+	//Зааааапущаем все библиотеки
 	ports_init();
 	ADC_init();
 	USART_init();
-	DRIVER_init(D2, D3, D4, D5, D6, D7);
+	DRIVER_init(EN_PIN, MS1_PIN, MS2_PIN, MS3_PIN, STEP_PIN, DIR_PIN);
 
-	ports_pinmod(D10, 1);
-	ports_writepin(D10, 0);
+	ports_pinmod(SCMD_PIN, PINMOD_OUT);
+	ports_writepin(SCMD_PIN, 0);
 	
 	while(1) {
 		command = USART_get();
@@ -170,7 +163,7 @@ int main()
 			DRIVER_forward();	
 			DRIVER_setdiv(1);
 			USART_println("Callibrating...");
-			while(PORTB_getpin(ENDER))
+			while(ports_getpin(ENDER_PIN))
 			{
 				_delay_ms(1.4);
 				USART_print("Ender");
@@ -180,7 +173,7 @@ int main()
 
 			DRIVER_backward();
 			DRIVER_setdiv(8);
-			while(ports_getpin(ROTOR))
+			while(ports_getpin(ROTOR_PIN))
 			{
 				_delay_ms(1.4);
 				USART_print("Rotor");
@@ -193,11 +186,11 @@ int main()
 		//TEST
 		if(command == CMD_TP)
 		{
-			if(ports_getpin(ENDER))
+			if(ports_getpin(ENDER_PIN))
 				USART_println("Ender 1");
 			else
 				USART_println("Ender 0");
-			if(ports_getpin(ROTOR))
+			if(ports_getpin(ROTOR_PIN))
 				USART_println("Rotor 1");
 			else
 				USART_println("Rotor 0");
@@ -242,6 +235,10 @@ int main()
 		if(command == CMD_FF)
 		{
 			filter(6);
+		}
+		if(command == CMD_FZ)
+		{
+			filter(7);
 		}
 
 		command = 0;
