@@ -7,7 +7,7 @@
 #define F_CPU 16000000
 // Скорость обмена данными по USART в бит/с
 // 76800 подобрано по таблице /SPECTRUM_stuff/AVR Baud Rate Tables.htm
-#define BAUDRATE 76800
+#define BAUDRATE 38400 // 76800 не хочет работать на винде
 // Значение регистра UBRR0, соответствующее выбранной скорости
 #define BAUD_PRESCALLER (((F_CPU / (BAUDRATE * 16UL))) - 1)
 
@@ -23,7 +23,7 @@ void USART_init()
 	UBRR0H = (uint8_t)(BAUD_PRESCALLER>>8);
 	UBRR0L = (uint8_t)BAUD_PRESCALLER;
 	//UCSR A
-
+	UCSR0A = ~(1<<U2X0);
 	//UCSR B
 	UCSR0B = (1<<RXCIE0) | (1<<TXEN0) | (1<<RXEN0);
 	//UCSR C

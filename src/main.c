@@ -84,7 +84,7 @@ void filter(int n) //Не трогай, работает.
 int main()
 {
 	uint16_t command = 0;
-	uint16_t cfg_mesure_start;
+	uint16_t cfg_mesure_start = 0;
 	uint16_t cfg_steps = 100;
 	uint16_t cfg_mesure_count = 1;
 	uint8_t cfg_filter = 0;
@@ -120,6 +120,16 @@ int main()
 			DRIVER_backward();
 			uint32_t steps = (uint32_t)cfg_steps * (uint32_t)cfg_div;
 			mesure(steps, cfg_mesure_count);
+		}
+
+		if(command == CMD_MT) //ТЕСТОВОЕ измерение
+		{
+			DRIVER_moveto(0);
+
+			DRIVER_setdiv(1);
+			DRIVER_backward();
+			uint32_t steps = (uint32_t)1000 * (uint32_t)1;
+			mesure(steps, 1);
 		}
 
 		//DRIVER

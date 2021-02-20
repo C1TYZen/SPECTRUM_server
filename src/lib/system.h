@@ -8,9 +8,8 @@
 #define CMD_MC	0x636d // установка количества измерений
 //do
 #define CMD_MB	0x626d // начать измерение
-#define CMD_MR	0x726d // установка диапазона измерений
 #define CMD_MS	0x736d // остановить измерение
-#define CMD_MF	0x666d // поиск
+#define CMD_MT  0x746d // тестовое измерение
 
 //set
 #define CMD_DD  0x6464 // установка направления
