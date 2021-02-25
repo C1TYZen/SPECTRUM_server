@@ -8,10 +8,10 @@ uint8_t USART_read();
 uint16_t USART_get();
 uint8_t USART_readnow();
 uint16_t USART_getmessage();
-void USART_readln(char* str);
+void USART_scanln(char*, size_t);
 
-void USART_write(uint8_t data);
-void USART_send(uint16_t data);
-void USART_println(char* string);
-void USART_print(char* string);
-void USART_putbyteview(uint8_t data);
+void USART_write(uint8_t);
+void USART_send(uint16_t);
+void USART_println(char*);
+void USART_print(char*);
+void USART_putbyteview(uint8_t);

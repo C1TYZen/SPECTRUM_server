@@ -12,11 +12,7 @@
 #define BAUD_PRESCALLER (((F_CPU / (BAUDRATE * 16UL))) - 1)
 
 /*
- * 1. Устанавливаем скорость обмена по USART
- * 2. Включаем возможность приема и передачи по интерфейсу,
- * а также разрешаем прерывание после каждого получения данных
- * 3. Определяем следующие настройки USART: 8 бит
- * в одном сообщении, 1 стоповый бит, без проверки четности
+ * 8 бит, 1 стоп бит
  */
 void USART_init()
 {
@@ -81,15 +77,18 @@ uint16_t USART_getmessage()
 }
 
 // Чтение строки
-void USART_readln(char* str)
+void USART_scanln(char* str, size_t len)
 {
 	int i;
-	for(i = 0; i < 100; i++)
+	str[i] = USART_read(); //первый байт - перевод строки
+	for(i = 0; i < (len - 1); i++)
 	{
-		*str = USART_read();
-		if(*str == ';')
+		str[i] = USART_read();
+		if((str[i] == '\r') || (str[i] == '\n'))
+		{
+			str[i] = '\0';
 			break;
-		str++;
+		}
 	}
 }
 
@@ -123,23 +122,23 @@ void USART_send(uint16_t data)
  * Входной аргумент - указатель на строку string.
  * В цикле последовательно отправляем строку байт за байтом.
  */
-void USART_println(char* string)
+void USART_println(char *str)
 {
-	while (*string != 0) {
-		USART_write(*string);
-		string++;
-	}
+	int i = 0;
+	for(; str[i] != 0; i++)
+		USART_write(str[i]);
+
 	USART_write('\r');
 	USART_write('\n');
 }
 
 // Отправка строки без перевода на следующую
-void USART_print(char* string)
+void USART_print(char* str)
 {
-	while (*string != 0) {
-		USART_write(*string);
-		string++;
-	}
+	int i = 0;
+	for(; str[i] != 0; i++)
+		USART_write(str[i]);
+
 	USART_write('\r');
 }
 

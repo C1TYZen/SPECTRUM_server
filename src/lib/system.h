@@ -2,6 +2,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <string.h>
+#include <stdio.h>
 
 // Команды
 //set
@@ -28,6 +30,7 @@
 //do
 #define CMD_CC	0x6363 // проверить соединение
 #define CMD_TP	0x7074 // тестирование пинов
+#define CMD_TF  0x6674 // тестовая функция
 
 //filter
 #define CMD_FA  0x6166 // filter 1
@@ -69,7 +72,42 @@
 
 void ports_init();
 
-uint8_t ports_getpin(int pin);
-void ports_writepin(int pin, int bit);
-void ports_switch(int pin);
-void ports_pinmod(int pin, int mod);
+uint8_t ports_getpin(int);
+void ports_writepin(int, int);
+void ports_switch(int);
+void ports_pinmod(int, int);
+
+/***********************
+ * BUILTINS
+ ***********************/
+typedef struct cfg_var_s
+{
+	char *name;
+	char *s_name; //Short name
+	uint16_t value;
+} cfg_var_t;
+
+typedef struct cfg_funk_s
+{
+	char *name;
+	char *s_name; //Short name
+	void (*funk)(uint16_t value);
+} cfg_funk_t;
+
+//Mesure
+void mf_begin(uint16_t);
+void mf_stop(uint16_t);
+
+//Driver
+void df_back(uint16_t);
+void df_forward(uint16_t);
+void df_calibrate(uint16_t);
+void df_position(uint16_t);
+void df_step(uint16_t);
+void df_interrupt(uint16_t);
+
+//Tests
+void tf_conn(uint16_t);
+void tf_mesure(uint16_t);
+void tf_pin(uint16_t);
+void tf_test(uint16_t);

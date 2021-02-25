@@ -32,12 +32,12 @@ void DRIVER_chdir();
 void DRIVER_forward();
 void DRIVER_backward();
 
-int8_t DRIVER_setdir(int8_t dir);
-int8_t DRIVER_setdiv(uint8_t div);
+int8_t DRIVER_setdir(int8_t);
+int8_t DRIVER_setdiv(uint8_t);
 
-void DRIVER_mvf(uint32_t trg);
-void DRIVER_mvb(uint32_t trg);
-void DRIVER_moveto(uint32_t r1);
+void DRIVER_mvf(uint32_t);
+void DRIVER_mvb(uint32_t);
+void DRIVER_moveto(uint32_t);
 
 uint32_t DRIVER_info();
 void DRIVER_reset();

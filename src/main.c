@@ -1,13 +1,3 @@
-/*
-	Интерфейс для функций установки значений:
-	function()
-	{
-		принять_значение()
-		выполнить действие()
-		отправить_строку_подтверждения()
-	}
-*/
-
 /***********************
  * MAIN
  ***********************/
@@ -26,28 +16,31 @@
 #define ROTOR_PIN	D9
 #define SCMD_PIN	D10
 
-void mesure(uint32_t st, uint16_t mc)
+void mesure(uint32_t steps, uint16_t mesure_count)
 {
 	_delay_ms(2);
 	USART_flush();
 	uint16_t mesure = 0;
 	uint16_t msg = 0;
-	uint8_t i;
+	uint8_t i = 0;
 
 	while(1)
 	{
+		//Mesuring
 		mesure = 0;
-		for(i = mc; i > 0; i--)
+		for(i = mesure_count; i > 0; i--)
 			mesure += ADC_read(0);
-		mesure /= mc;
+		mesure /= mesure_count;
 		USART_send(mesure);
-		//USART_send(DRIVER_info()/8);
 
+		//Thinking
 		msg = USART_getmessage();
-		if((msg == CMD_DI) || (st < 1))
+		if((msg == CMD_DI) || (steps < 1))
 			break;
+		
+		//Walking
 		DRIVER_step();
-		st--;
+		steps--;
 		_delay_ms(1.4);
 		//1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
 	}
@@ -83,13 +76,13 @@ void filter(int n) //Не трогай, работает.
 
 int main()
 {
-	uint16_t command = 0;
-	uint16_t cfg_mesure_start = 0;
-	uint16_t cfg_steps = 100;
-	uint16_t cfg_mesure_count = 1;
-	uint8_t cfg_filter = 0;
-	uint8_t cfg_div = 1;
-	uint8_t cfg_dir = 1;
+	uint16_t 	command 			= 0;
+	uint16_t 	cfg_mesure_start 	= 0;
+	uint16_t 	cfg_steps 			= 100;
+	uint16_t 	cfg_mesure_count 	= 1;
+	uint8_t 	cfg_filter 			= 0;
+	uint8_t 	cfg_div 			= 1;
+	uint8_t 	cfg_dir 			= 1;
 
 	//Зааааапущаем все библиотеки
 	ports_init();
@@ -102,6 +95,11 @@ int main()
 	
 	while(1) {
 		command = USART_get();
+
+		if(command == CMD_TF)
+		{
+			tf_test(42);
+		}
 
 		//MESURE
 		//set***************
