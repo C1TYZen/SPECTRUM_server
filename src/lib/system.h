@@ -11,7 +11,6 @@
 //do
 #define CMD_MB	0x626d // начать измерение
 #define CMD_MS	0x736d // остановить измерение
-#define CMD_MT  0x746d // тестовое измерение
 
 //set
 #define CMD_DD  0x6464 // установка направления
@@ -22,13 +21,14 @@
 #define CMD_DI	0x6964 // остановка двигателя
 #define CMD_DB	0x6264 // направление двигателя назад
 #define CMD_DF	0x6664 // направление двигателя вперед
-#define CMD_DC	0x6364 // калибровка
 #define CMD_DP  0x7064 // вывод информации о положении двигателя
+#define CMD_DZ  0x7a64 // двигатель на ноль
 
 //set
 #define CMD_ST	0x7473 // установка количества шагов
 //do
 #define CMD_CC	0x6363 // проверить соединение
+#define CMD_CS  0x7363 // установка значения переменной
 #define CMD_TP	0x7074 // тестирование пинов
 #define CMD_TF  0x6674 // тестовая функция
 
@@ -42,7 +42,6 @@
 #define CMD_FZ 	0x7a66 // filter zero position
 
 //Порты
-
 // D2 		PD2
 // D3 		PD3
 // D4 		PD4
@@ -70,44 +69,16 @@
 #define PINMOD_IN	0
 #define PINMOD_OUT	1
 
+/****************
+ * PORTS
+ ****************/
 void ports_init();
+uint8_t ports_getpin(int pin_num);
+void ports_writepin(int pin_num, int bit);
+void ports_switch(int pin_num);
+void ports_pinmod(int pin_num, int PINMOD);
 
-uint8_t ports_getpin(int);
-void ports_writepin(int, int);
-void ports_switch(int);
-void ports_pinmod(int, int);
-
-/***********************
- * BUILTINS
- ***********************/
-typedef struct cfg_var_s
-{
-	char *name;
-	char *s_name; //Short name
-	uint16_t value;
-} cfg_var_t;
-
-typedef struct cfg_funk_s
-{
-	char *name;
-	char *s_name; //Short name
-	void (*funk)(uint16_t value);
-} cfg_funk_t;
-
-//Mesure
-void mf_begin(uint16_t);
-void mf_stop(uint16_t);
-
-//Driver
-void df_back(uint16_t);
-void df_forward(uint16_t);
-void df_calibrate(uint16_t);
-void df_position(uint16_t);
-void df_step(uint16_t);
-void df_interrupt(uint16_t);
-
-//Tests
-void tf_conn(uint16_t);
-void tf_mesure(uint16_t);
-void tf_pin(uint16_t);
-void tf_test(uint16_t);
+/****************
+ * UTILS
+ ****************/
+void str_parse(char* string, char* name, size_t str_size, int* optinons);

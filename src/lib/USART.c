@@ -1,19 +1,18 @@
-/***********************
+/****************
  * USART
- ***********************/
+ ****************/
 #include "system.h"
 #include "USART.h"
 
 #define F_CPU 16000000
 // Скорость обмена данными по USART в бит/с
-// 76800 подобрано по таблице /SPECTRUM_stuff/AVR Baud Rate Tables.htm
-#define BAUDRATE 38400 // 76800 не хочет работать на винде
+// 76800 и 38400 подобрано по таблице /SPECTRUM_stuff/AVR Baud Rate Tables.htm
+// 76800 не хочет работать на винде
+#define BAUDRATE 38400
 // Значение регистра UBRR0, соответствующее выбранной скорости
 #define BAUD_PRESCALLER (((F_CPU / (BAUDRATE * 16UL))) - 1)
 
-/*
- * 8 бит, 1 стоп бит
- */
+// 8 бит, 1 стоп бит
 void USART_init()
 {
 	UBRR0H = (uint8_t)(BAUD_PRESCALLER>>8);
