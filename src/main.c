@@ -185,6 +185,7 @@ void sys_mesure(div8step_pos32b steps, uint16_t m_count, uint16_t speed)
 	uint16_t mesure = 0;
 	uint16_t msg = 0;
 	uint8_t i = 0;
+	uint16_t delay_counter = 0;
 
 	while(1)
 	{
@@ -208,8 +209,10 @@ void sys_mesure(div8step_pos32b steps, uint16_t m_count, uint16_t speed)
 		//Walking
 		DRIVER_step();
 		steps--;
-		_delay_ms(1.4);
+		//_delay_ms(1.4);
 		//1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
+		for(delay_counter = 0; delay_counter < speed; delay_counter++)
+			_delay_ms(0.1);
 	}
 	USART_flush();
 	USART_send(CMD_MS);

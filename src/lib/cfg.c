@@ -5,37 +5,37 @@
 cfg_var_t mv_start =
 {
 	.name = "mv_start",
-	.id = CMD_MA,
+	.id = CVAR_MA,
 	.value = 0
 };
 cfg_var_t mv_end =
 {
 	.name = "mv_end",
-	.id = CMD_MZ,
+	.id = CVAR_MZ,
 	.value = 100
 };
 cfg_var_t mv_count = 
 {
 	.name = "mv_count",
-	.id = CMD_MC,
+	.id = CVAR_MC,
 	.value = 1
 };
 cfg_var_t dv_speed =
 {
 	.name = "dv_speed",
-	.id = CMD_DS,
+	.id = CVAR_DS,
 	.value = 700 // шагов в секунду (700 ~ 1.4ms delay)
 };
 cfg_var_t fv_num = 
 {
 	.name = "fv_num",
-	.id = CMD_FN,
+	.id = CVAR_FN,
 	.value = 1
 };
 cfg_var_t fv_step = 
 {
 	.name = "fv_step",
-	.id = CMD_FS,
+	.id = CVAR_FS,
 	.value = 0
 };
 

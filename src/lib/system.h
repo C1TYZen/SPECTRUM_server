@@ -1,3 +1,4 @@
+//made by CiTYZen
 #define __AVR_ATmega168P__
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -18,12 +19,12 @@
 #define CMD_MI  0x696d // прервать измерение
 
 //Переменные
-#define CMD_MA  0x616d // начало измерения
-#define CMD_MZ  0x7a6d // конец измерения
-#define CMD_MC  0x636d // количество измерений
-#define CMD_DS  0x7364 // скорость двигателя
-#define CMD_FN  0x6e66 // номер фильтра
-#define CMD_FS  0x7366 // шаг установки фильтра
+#define CVAR_MA  0x616d // начало измерения
+#define CVAR_MZ  0x7a6d // конец измерения
+#define CVAR_MC  0x636d // количество измерений
+#define CVAR_DS  0x7364 // скорость двигателя
+#define CVAR_FN  0x6e66 // номер фильтра
+#define CVAR_FS  0x7366 // шаг установки фильтра
 
 //Порты
 // D2 		PD2
