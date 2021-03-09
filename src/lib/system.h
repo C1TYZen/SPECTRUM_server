@@ -5,41 +5,25 @@
 #include <string.h>
 #include <stdio.h>
 
-// Команды
-//set
-#define CMD_MC	0x636d // установка количества измерений
-//do
+//Функции
 #define CMD_MB	0x626d // начать измерение
-#define CMD_MS	0x736d // остановить измерение
-
-//set
-#define CMD_DD  0x6464 // установка направления
-#define CMD_DM  0x6d64 // установка начала измерения
-#define CMD_DV	0x7664 // установка делителя шага
-//do
-#define CMD_DS	0x7364 // шаг двигателя
-#define CMD_DI	0x6964 // остановка двигателя
-#define CMD_DB	0x6264 // направление двигателя назад
-#define CMD_DF	0x6664 // направление двигателя вперед
-#define CMD_DP  0x7064 // вывод информации о положении двигателя
 #define CMD_DZ  0x7a64 // двигатель на ноль
-
-//set
-#define CMD_ST	0x7473 // установка количества шагов
-//do
 #define CMD_CC	0x6363 // проверить соединение
 #define CMD_CS  0x7363 // установка значения переменной
 #define CMD_TP	0x7074 // тестирование пинов
 #define CMD_TF  0x6674 // тестовая функция
 
-//filter
-#define CMD_FA  0x6166 // filter 1
-#define CMD_FB  0x6266 // filter 2
-#define CMD_FC  0x6366 // filter 3
-#define CMD_FD  0x6466 // filter 4
-#define CMD_FE  0x6566 // filter 5
-#define CMD_FF  0x6666 // filter 6
-#define CMD_FZ 	0x7a66 // filter zero position
+//Сообщения
+#define CMD_MS	0x736d // остановить измерение
+#define CMD_MI  0x696d // прервать измерение
+
+//Переменные
+#define CMD_MA  0x616d // начало измерения
+#define CMD_MZ  0x7a6d // конец измерения
+#define CMD_MC  0x636d // количество измерений
+#define CMD_DS  0x7364 // скорость двигателя
+#define CMD_FN  0x6e66 // номер фильтра
+#define CMD_FS  0x7366 // шаг установки фильтра
 
 //Порты
 // D2 		PD2

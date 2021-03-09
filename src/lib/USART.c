@@ -44,7 +44,7 @@ uint8_t USART_read()
 	return UDR0;
 }
 
-// Чтение пакета байт
+// Чтение 2х байт
 uint16_t USART_get()
 {
 	uint16_t cmd = 0;

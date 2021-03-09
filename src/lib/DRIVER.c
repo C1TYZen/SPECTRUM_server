@@ -1,13 +1,10 @@
-/****************
- * DRIVER
- ****************/
 #include "system.h"
 #include "DRIVER.h"
 
-uint32_t 	DRIVER_position = 0;
-int8_t 		DRIVER_dir 		= 1;
-uint8_t 	DRIVER_div 		= 1;
-driver_port_cfg cfg;
+fullstep_pos16b DRIVER_position = 0;
+int8_t 		DRIVER_dir 			= 1;
+uint8_t 	DRIVER_div 			= 1;
+driver_port_cfg_t cfg;
 
 /**
  * Инициализация библиотеки двигателя
@@ -141,7 +138,7 @@ int8_t DRIVER_setdiv(uint8_t div)
 	return div;
 }
 
-void DRIVER_mvf(uint32_t trg)
+void DRIVER_mvf(fullstep_pos16b trg)
 {
 	DRIVER_setdir(-1);
 	while(DRIVER_position > trg)
@@ -159,7 +156,7 @@ void DRIVER_mvf(uint32_t trg)
 	}
 }
 
-void DRIVER_mvb(uint32_t trg)
+void DRIVER_mvb(fullstep_pos16b trg)
 {
 	DRIVER_setdir(1);
 	while(DRIVER_position < trg)
@@ -177,7 +174,7 @@ void DRIVER_mvb(uint32_t trg)
 	}
 }
 
-void DRIVER_moveto(uint32_t start)
+void DRIVER_moveto(div8step_pos32b start)
 {
 	start *= 8;
 	if(DRIVER_position < start)
@@ -189,12 +186,14 @@ void DRIVER_moveto(uint32_t start)
 		DRIVER_mvf(start);
 	}
 	else
+	{
 		return;
+	}
 }
 
-uint32_t DRIVER_info()
+div8step_pos32b DRIVER_getpos()
 {
-	return DRIVER_position;
+	return DRIVER_position / 8;
 }
 
 void DRIVER_reset()

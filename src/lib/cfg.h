@@ -1,7 +1,7 @@
 typedef struct cfg_var_s
 {
 	char* name;
-	char* s_name; //Short name
+	uint16_t id;
 	uint16_t value;
 } cfg_var_t;
 
@@ -16,5 +16,6 @@ cfg_var_t fv_step;
 cfg_var_t z_endvar;
 
 int cfg_numofvars();
-void cfg_set(char *name, uint16_t *value);
+void cfgt_set(char *name, uint16_t *value);
+void cfgc_set(uint16_t *id, uint16_t *value);
 uint16_t cfg_search(char *name);

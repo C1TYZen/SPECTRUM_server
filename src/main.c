@@ -31,7 +31,9 @@ void mf_begin(sys_code16_t value)
 	DRIVER_moveto(mv_start.value);
 
 	uint16_t div = DRIVER_setdiv(8);
-	uint16_t steps = abs(mv_end.value - mv_start.value) * div;
+	div8step_pos32b x0 = mv_start.value;
+	div8step_pos32b x1 = mv_end.value;
+	div8step_pos32b steps = (x1 - x0) * div;
 	uint16_t speed = (1000.f / (float)dv_speed.value) / 0.1;
 	DRIVER_backward();
 	sys_mesure(steps, mv_count.value, speed);
@@ -65,15 +67,10 @@ void df_tozero(sys_code16_t value)
 	DRIVER_reset();
 }
 
-void df_step(sys_code16_t value)
-{
-	DRIVER_step(value);
-}
-
 /****************
  * CONFIG
  ****************/
-void cf_set(sys_code16_t value)
+void cft_set(sys_code16_t value)
 {
 	char str[16];
 	char name[16];
@@ -81,7 +78,17 @@ void cf_set(sys_code16_t value)
 	USART_println("var name:");
 	USART_scanln(str, 16);
 	str_parse(str, name, 16, &val);
-	cfg_set(name, &val);
+	cfgt_set(name, &val);
+}
+
+void cfc_set(sys_code16_t value)
+{
+	char str[32];
+	uint16_t id = USART_get();
+	uint16_t val = USART_get();
+	cfgc_set(&id, &val);
+	sprintf(str, "id: %d val: %d", id, val);
+	USART_println(str);
 }
 
 /****************
@@ -117,7 +124,7 @@ void tf_test(sys_code16_t value)
 /****************
  * SYS
  ****************/
-sys_funk_t sys_funk[] =
+sys_funk_t sys_cfunk[] =
 {
 	//Mesure________________
 	{
@@ -131,16 +138,11 @@ sys_funk_t sys_funk[] =
 		.id 	= CMD_DZ,
 		.funk 	= &df_tozero
 	},
-	{
-		.name 	= "df_step",
-		.id 	= CMD_DS,
-		.funk 	= &df_step
-	},
 	//Config________________
 	{
 		.name 	= "cf_set",
 		.id 	= CMD_CS,
-		.funk 	= &cf_set
+		.funk 	= &cfc_set
 	},
 	//Tests________________
 	{
@@ -173,10 +175,10 @@ void sys_init()
 
 int sys_numoffunks()
 {
-	return sizeof(sys_funk) / sizeof(sys_funk_t);
+	return sizeof(sys_cfunk) / sizeof(sys_funk_t);
 }
 
-void sys_mesure(uint16_t steps, uint16_t m_count, uint16_t speed)
+void sys_mesure(div8step_pos32b steps, uint16_t m_count, uint16_t speed)
 {
 	_delay_ms(2);
 	USART_flush();
@@ -195,8 +197,13 @@ void sys_mesure(uint16_t steps, uint16_t m_count, uint16_t speed)
 
 		//Thinking
 		msg = USART_getmessage();
-		if((msg == CMD_DI) || (steps < 1))
+		if((msg == CMD_MI) || (steps < 1))
 			break;
+
+		//тестить
+		if((fv_step.value != 0) && (DRIVER_getpos() == fv_step.value))
+			sys_filter(fv_num.value);
+		//testing
 		
 		//Walking
 		DRIVER_step();
@@ -239,21 +246,20 @@ void sys_filter(int n) //НЕ ЛЕЗЬ, РАБОТАЕТ!
  ****************/
 int main()
 {
-	uint16_t cmd = 0;
-
 	sys_init();
-	
+
+	uint16_t cmd = 0;
+	int i = 0;
+	int num = sys_numoffunks();
+
 	while(1) {
 		cmd = USART_get();
 
-		char str[16];
-		int i = 0;
-		int num = sys_numoffunks();
-		for(; i < num; i++)
+		for(i = 0; i < num; i++)
 		{
-			if(cmd == sys_funk[i].id)
+			if(cmd == sys_cfunk[i].id)
 			{
-				sys_funk[i].funk(0);
+				sys_cfunk[i].funk(0);
 				//USART_println("correct");
 				break;
 			}
