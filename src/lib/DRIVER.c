@@ -1,7 +1,7 @@
 #include "system.h"
 #include "DRIVER.h"
 
-fullstep_pos16b DRIVER_position = 0;
+full_step_uint16_t DRIVER_position = 0;
 int8_t 		DRIVER_dir 			= 1;
 uint8_t 	DRIVER_div 			= 1;
 driver_port_cfg_t cfg;
@@ -55,7 +55,7 @@ void DRIVER_backward()
 }
 //////////////////////////////////////
 
-// Смотреть со стороны крепления ротора
+// Смотреть со стороны крепления шестерни на ротор двигателя
 // Направление вращения вправо
 void DRIVER_dexter()
 {
@@ -138,7 +138,8 @@ int8_t DRIVER_setdiv(uint8_t div)
 	return div;
 }
 
-void DRIVER_mvf(fullstep_pos16b trg)
+//move forward
+void DRIVER_mvf(full_step_uint16_t trg)
 {
 	DRIVER_setdir(-1);
 	while(DRIVER_position > trg)
@@ -156,7 +157,8 @@ void DRIVER_mvf(fullstep_pos16b trg)
 	}
 }
 
-void DRIVER_mvb(fullstep_pos16b trg)
+//move back
+void DRIVER_mvb(full_step_uint16_t trg)
 {
 	DRIVER_setdir(1);
 	while(DRIVER_position < trg)
@@ -174,7 +176,7 @@ void DRIVER_mvb(fullstep_pos16b trg)
 	}
 }
 
-void DRIVER_moveto(div8step_pos32b start)
+void DRIVER_moveto(div_step_uint32_t start)
 {
 	start *= 8;
 	if(DRIVER_position < start)
@@ -191,9 +193,9 @@ void DRIVER_moveto(div8step_pos32b start)
 	}
 }
 
-div8step_pos32b DRIVER_getpos()
+full_step_uint16_t DRIVER_getpos()
 {
-	return DRIVER_position / 8;
+	return DRIVER_position;
 }
 
 void DRIVER_reset()

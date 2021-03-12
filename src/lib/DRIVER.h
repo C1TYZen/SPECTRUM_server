@@ -23,9 +23,9 @@ typedef struct driver_port_cfg_s
 } driver_port_cfg_t;
 
 // Тип для хранения количества полных шагов
-typedef uint16_t fullstep_pos16b;
+typedef uint16_t full_step_uint16_t;
 // Тип для хранения количества шагов с делителем 8
-typedef uint32_t div8step_pos32b;
+typedef uint32_t div_step_uint32_t;
 
 void DRIVER_init(int en, int ms1, int ms2, int ms3, int step, int dir);
 
@@ -37,9 +37,9 @@ void DRIVER_backward();
 int8_t DRIVER_setdir(int8_t);
 int8_t DRIVER_setdiv(uint8_t);
 
-void DRIVER_mvf(fullstep_pos16b);
-void DRIVER_mvb(fullstep_pos16b);
-void DRIVER_moveto(div8step_pos32b);
+void DRIVER_mvf(full_step_uint16_t);
+void DRIVER_mvb(full_step_uint16_t);
+void DRIVER_moveto(div_step_uint32_t);
 
-div8step_pos32b DRIVER_getpos();
+full_step_uint16_t DRIVER_getpos();
 void DRIVER_reset();

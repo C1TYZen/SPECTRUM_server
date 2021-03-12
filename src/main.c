@@ -31,9 +31,9 @@ void mf_begin(sys_code16_t value)
 	DRIVER_moveto(mv_start.value);
 
 	uint16_t div = DRIVER_setdiv(8);
-	div8step_pos32b x0 = mv_start.value;
-	div8step_pos32b x1 = mv_end.value;
-	div8step_pos32b steps = (x1 - x0) * div;
+	div_step_uint32_t x0 = mv_start.value;
+	div_step_uint32_t x1 = mv_end.value;
+	div_step_uint32_t steps = (x1 - x0) * div;
 	uint16_t speed = (1000.f / (float)dv_speed.value) / 0.1;
 	DRIVER_backward();
 	sys_mesure(steps, mv_count.value, speed);
@@ -92,6 +92,17 @@ void cfc_set(sys_code16_t value)
 }
 
 /****************
+ * FILTER
+ ****************/
+void ff_a(sys_code16_t value) { sys_filter(1); }
+void ff_b(sys_code16_t value) { sys_filter(2); }
+void ff_c(sys_code16_t value) { sys_filter(3); }
+void ff_d(sys_code16_t value) { sys_filter(4); }
+void ff_e(sys_code16_t value) { sys_filter(5); }
+void ff_f(sys_code16_t value) { sys_filter(6); }
+void ff_z(sys_code16_t value) { sys_filter(0); }
+
+/****************
  * TEST
  ****************/
 void tf_conn(sys_code16_t value)
@@ -114,11 +125,7 @@ void tf_pin(sys_code16_t value)
 
 void tf_test(sys_code16_t value)
 {
-	char str[16];
-	uint16_t dv_div = DRIVER_setdiv(8);
-	sprintf(str, "steps: %d", \
-		((uint16_t)(abs(mv_end.value - mv_start.value)) * (uint16_t)dv_div));
-	USART_println(str);
+	sys_filter(1);
 }
 
 /****************
@@ -143,6 +150,42 @@ sys_funk_t sys_cfunk[] =
 		.name 	= "cf_set",
 		.id 	= CMD_CS,
 		.funk 	= &cfc_set
+	},
+	//Filter_______________
+	{
+		.name = "ff_a",
+		.id = CMD_FA,
+		.funk = &ff_a
+	},
+	{
+		.name = "ff_b",
+		.id = CMD_FB,
+		.funk = &ff_b
+	},
+	{
+		.name = "ff_c",
+		.id = CMD_FC,
+		.funk = &ff_c
+	},
+	{
+		.name = "ff_d",
+		.id = CMD_FD,
+		.funk = &ff_d
+	},
+	{
+		.name = "ff_e",
+		.id = CMD_FE,
+		.funk = &ff_e
+	},
+	{
+		.name = "ff_f",
+		.id = CMD_FF,
+		.funk = &ff_f
+	},
+	{
+		.name = "ff_z",
+		.id = CMD_FZ,
+		.funk = &ff_z
 	},
 	//Tests________________
 	{
@@ -178,7 +221,7 @@ int sys_numoffunks()
 	return sizeof(sys_cfunk) / sizeof(sys_funk_t);
 }
 
-void sys_mesure(div8step_pos32b steps, uint16_t m_count, uint16_t speed)
+void sys_mesure(div_step_uint32_t steps, uint16_t m_count, uint16_t speed)
 {
 	_delay_ms(2);
 	USART_flush();
@@ -201,7 +244,7 @@ void sys_mesure(div8step_pos32b steps, uint16_t m_count, uint16_t speed)
 		if((msg == CMD_MI) || (steps < 1))
 			break;
 
-		//тестить
+		//testing
 		if((fv_step.value != 0) && (DRIVER_getpos() == fv_step.value))
 			sys_filter(fv_num.value);
 		//testing
@@ -242,6 +285,11 @@ void sys_filter(int n) //НЕ ЛЕЗЬ, РАБОТАЕТ!
 	USART_println("OK");
 	ports_pinmod(SCMD_PIN, PINMOD_OUT);
 	ports_writepin(SCMD_PIN, 0);
+}
+
+void sys_dummy_filter(int n)
+{ 
+	_delay_ms(1000);
 }
 
 /****************

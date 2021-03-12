@@ -11,6 +11,15 @@
 #define CMD_DZ  0x7a64 // двигатель на ноль
 #define CMD_CC	0x6363 // проверить соединение
 #define CMD_CS  0x7363 // установка значения переменной
+
+#define CMD_FA 0x6166
+#define CMD_FB 0x6266
+#define CMD_FC 0x6366
+#define CMD_FD 0x6466
+#define CMD_FE 0x6566
+#define CMD_FF 0x6666
+#define CMD_FZ 0x7a66
+
 #define CMD_TP	0x7074 // тестирование пинов
 #define CMD_TF  0x6674 // тестовая функция
 

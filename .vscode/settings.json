@@ -1,9 +1,9 @@
 {
-	"editor.rulers": [80],
 	"files.associations": {
 		"*.h": "c",
-		"redactor": "c"
+		"*.c": "c"
 	},
+	"editor.rulers": [80],
 	"workbench.colorCustomizations": {
 		"editorRuler.foreground": "#df40ff",
 
