@@ -11,6 +11,7 @@ cfg_var_t mv_count;
 cfg_var_t dv_speed;
 cfg_var_t fv_num;
 cfg_var_t fv_step;
+cfg_var_t *cfg_var_list[]; 
 
 // Нулевая переменная
 cfg_var_t z_endvar;

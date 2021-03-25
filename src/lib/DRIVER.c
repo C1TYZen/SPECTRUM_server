@@ -1,5 +1,6 @@
 #include "system.h"
 #include "DRIVER.h"
+#include "USART.h"
 
 full_step_uint16_t DRIVER_position = 0;
 int8_t 		DRIVER_dir 			= 1;

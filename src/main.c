@@ -49,7 +49,7 @@ void df_tozero(sys_code16_t value)
 	USART_println("Moving...");
 	while(ports_getpin(ENDER_PIN))
 	{
-		_delay_ms(1.4);
+		_delay_ms(2);
 		USART_print("Ender");
 		DRIVER_step();
 	}
@@ -70,24 +70,28 @@ void df_tozero(sys_code16_t value)
 /****************
  * CONFIG
  ****************/
+//Функция для терминала
 void cft_set(sys_code16_t value)
 {
 	char str[16];
 	char name[16];
 	uint16_t val = 0;
-	USART_println("var name:");
+	//USART_println("var name:");
 	USART_scanln(str, 16);
 	str_parse(str, name, 16, &val);
 	cfgt_set(name, &val);
+	sprintf(str, "id: %s val: %d", name, val);
+	USART_println(str);
 }
 
+//Функция для клиентской проги
 void cfc_set(sys_code16_t value)
 {
-	char str[32];
-	uint16_t id = USART_get();
+	char str[64];
+	uint16_t id = value;
 	uint16_t val = USART_get();
 	cfgc_set(&id, &val);
-	sprintf(str, "id: %d val: %d", id, val);
+	sprintf(str, "(%x) %d", id, val);
 	USART_println(str);
 }
 
@@ -312,6 +316,13 @@ int main()
 			{
 				sys_cfunk[i].funk(0);
 				//USART_println("correct");
+				break;
+			}
+
+			if((cmd == (*cfg_var_list[i]).id) && (i < cfg_numofvars()))
+			{
+				cfc_set(cmd);
+				//USART_println("HERE");
 				break;
 			}
 		}
