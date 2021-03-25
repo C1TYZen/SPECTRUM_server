@@ -70,7 +70,7 @@ void df_tozero(sys_code16_t value)
 /****************
  * CONFIG
  ****************/
-//Функция для терминала
+//Функция для терминала (хз работает или нет)
 void cft_set(sys_code16_t value)
 {
 	char str[16];
@@ -84,7 +84,7 @@ void cft_set(sys_code16_t value)
 	USART_println(str);
 }
 
-//Функция для клиентской проги
+//Функция для клиентской проги (используется эта)
 void cfc_set(sys_code16_t value)
 {
 	char str[64];
