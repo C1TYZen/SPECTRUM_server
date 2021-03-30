@@ -17,6 +17,6 @@ cfg_var_t *cfg_var_list[];
 cfg_var_t z_endvar;
 
 int cfg_numofvars();
-void cfgt_set(char *name, uint16_t *value);
-void cfgc_set(uint16_t *id, uint16_t *value);
+void cfg_set_ch(char *name, uint16_t *value);
+void cfg_set_ui16(uint16_t *id, uint16_t *value);
 uint16_t cfg_search(char *name);

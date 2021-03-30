@@ -79,7 +79,7 @@ void cft_set(sys_code16_t value)
 	//USART_println("var name:");
 	USART_scanln(str, 16);
 	str_parse(str, name, 16, &val);
-	cfgt_set(name, &val);
+	cfg_set_ch(name, &val);
 	sprintf(str, "id: %s val: %d", name, val);
 	USART_println(str);
 }
@@ -90,7 +90,7 @@ void cfc_set(sys_code16_t value)
 	char str[64];
 	uint16_t id = value;
 	uint16_t val = USART_get();
-	cfgc_set(&id, &val);
+	cfg_set_ui16(&id, &val);
 	sprintf(str, "(%x) %d", id, val);
 	USART_println(str);
 }
@@ -135,6 +135,20 @@ void tf_test(sys_code16_t value)
 /****************
  * SYS
  ****************/
+/*
+ * Название переменной или функции состоит из префикса и самого названия.
+ * Первая буква префикса определят устройство или процесс, к которому относится
+ * переменная или функция. m - измерение (measure), d - шаговый двигатель
+ * (driver), f - блок светофильтров (filter), t - тесты (test).
+ * Вторая буква в префиксе означает вид сущности. v - переменная (variable),
+ * f - функция (function).
+ * Исключение - функции cfc_set и cft_set. Третья буква в префиксе означает
+ * для какой клиентской программы предназначена эта функция. c - клиентское
+ * приложения для записи спектров, t - терминальная программа, способная
+ * работать с серийным портом. Все высокоуровневые функции, определенные в
+ * файле main.c, выполняющие комплексные или вспомогательные задачи,
+ * обозначаются префиксом sys.
+ */
 sys_funk_t sys_cfunk[] =
 {
 	//Mesure________________
@@ -312,17 +326,16 @@ int main()
 
 		for(i = 0; i < num; i++)
 		{
+			//Поиск функции
 			if(cmd == sys_cfunk[i].id)
 			{
 				sys_cfunk[i].funk(0);
-				//USART_println("correct");
 				break;
 			}
-
+			//Поиск переменной
 			if((cmd == (*cfg_var_list[i]).id) && (i < cfg_numofvars()))
 			{
 				cfc_set(cmd);
-				//USART_println("HERE");
 				break;
 			}
 		}

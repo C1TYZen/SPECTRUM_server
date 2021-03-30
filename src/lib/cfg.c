@@ -68,7 +68,7 @@ int cfg_numofvars()
 }
 
 // Установка значения перменной
-void cfgt_set(char *name, uint16_t *value)
+void cfg_set_ch(char *name, uint16_t *value)
 {
 	int i = 0;
 	int num = cfg_numofvars();
@@ -82,7 +82,7 @@ void cfgt_set(char *name, uint16_t *value)
 	}
 }
 
-void cfgc_set(uint16_t *id, uint16_t *value)
+void cfg_set_ui16(uint16_t *id, uint16_t *value)
 {
 	int i = 0;
 	int num = cfg_numofvars();
