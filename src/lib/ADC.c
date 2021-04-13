@@ -29,8 +29,8 @@ void ADC_init()
  */
 uint16_t ADC_read(uint8_t ch)
 {
-	ch &= 0b00000111;
-	ADMUX = (ADMUX & 0xF8) | ch;
+	ch &= 0b00000111; //0 < ch < 7
+	ADMUX = (ADMUX & 0xF8) | ch; //0xF8 = 1111 1000
 	ADCSRA |= (1<<ADSC);
 	while(ADCSRA & (1<<ADSC));
  

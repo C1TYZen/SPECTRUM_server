@@ -28,16 +28,17 @@
 #define OFF 0
 
 //!!!ПРОТЕСТИРОВАТЬ!!!
-void motor(int onoff) 
-{
-	if(onoff == ON)
-		ports_writepin(EN_PIN, 0);
+// void motor(int onoff) 
+// {
+// 	if(onoff == ON)
+// 		ports_writepin(SLEEP_PIN, 1);
 
-	_delay_ms(2);
+	
+// 	if(onoff == OFF)
+// 		ports_writepin(SLEEP_PIN, 0);
 
-	if(onoff == OFF)
-		ports_writepin(EN_PIN, 1);
-}
+// 	_delay_ms(2);
+// }
 //!!!
 
 void step(int steps)
