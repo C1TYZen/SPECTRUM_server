@@ -10,9 +10,11 @@
 #define MS3_PIN		D5
 #define STEP_PIN	D6
 #define DIR_PIN		D7
-#define ENDER_PIN	D8
-#define ROTOR_PIN	D9
-#define SCMD_PIN	D10
+
+#define ENDER_PIN	D8 //Концевая оптопара
+#define ROTOR_PIN	D9 //Оптопара на роторе
+
+#define SCMD_PIN	D10 //Команды светофильтру
 
 typedef unsigned short sys_code16_t;
 
@@ -34,8 +36,12 @@ void mf_begin(sys_code16_t value)
 	div_step_uint32_t x0 = mv_start.value;
 	div_step_uint32_t x1 = mv_end.value;
 	div_step_uint32_t steps = (x1 - x0) * div;
-	uint16_t speed = (1000.f / (float)dv_speed.value) / 0.1;
+	uint16_t speed = (1000.f / (float)dv_speed.value) / 0.1f;
 	DRIVER_backward();
+
+	USART_flush();
+	USART_send(CMD_MS);
+
 	sys_mesure(steps, mv_count.value, speed);
 }
 
@@ -46,24 +52,19 @@ void df_tozero(sys_code16_t value)
 {
 	DRIVER_forward();	
 	DRIVER_setdiv(1);
-	USART_println("Moving...");
 	while(ports_getpin(ENDER_PIN))
 	{
-		_delay_ms(2);
-		USART_print("Ender");
+		_delay_ms(1.4);
 		DRIVER_step();
 	}
-	USART_println("END  ");
 
 	DRIVER_backward();
 	DRIVER_setdiv(8);
 	while(ports_getpin(ROTOR_PIN))
 	{
 		_delay_ms(1.4);
-		USART_print("Rotor");
 		DRIVER_step();
 	}
-	USART_println("ZERO");
 	DRIVER_reset();
 }
 
@@ -84,7 +85,7 @@ void cft_set(sys_code16_t value)
 	USART_println(str);
 }
 
-//Функция для клиентской проги (используется эта)
+//Функция для клиентской проги (используется)
 void cfc_set(sys_code16_t value)
 {
 	char str[64];
@@ -135,20 +136,6 @@ void tf_test(sys_code16_t value)
 /****************
  * SYS
  ****************/
-/*
- * Название переменной или функции состоит из префикса и самого названия.
- * Первая буква префикса определят устройство или процесс, к которому относится
- * переменная или функция. m - измерение (measure), d - шаговый двигатель
- * (driver), f - блок светофильтров (filter), t - тесты (test).
- * Вторая буква в префиксе означает вид сущности. v - переменная (variable),
- * f - функция (function).
- * Исключение - функции cfc_set и cft_set. Третья буква в префиксе означает
- * для какой клиентской программы предназначена эта функция. c - клиентское
- * приложения для записи спектров, t - терминальная программа, способная
- * работать с серийным портом. Все высокоуровневые функции, определенные в
- * файле main.c, выполняющие комплексные или вспомогательные задачи,
- * обозначаются префиксом sys.
- */
 sys_funk_t sys_cfunk[] =
 {
 	//Mesure________________
@@ -169,43 +156,43 @@ sys_funk_t sys_cfunk[] =
 		.id 	= CMD_CS,
 		.funk 	= &cfc_set
 	},
-	//Filter_______________
+	//Filter________________
 	{
-		.name = "ff_a",
-		.id = CMD_FA,
-		.funk = &ff_a
+		.name 	= "ff_a",
+		.id 	= CMD_FA,
+		.funk 	= &ff_a
 	},
 	{
-		.name = "ff_b",
-		.id = CMD_FB,
-		.funk = &ff_b
+		.name 	= "ff_b",
+		.id 	= CMD_FB,
+		.funk 	= &ff_b
 	},
 	{
-		.name = "ff_c",
-		.id = CMD_FC,
-		.funk = &ff_c
+		.name 	= "ff_c",
+		.id 	= CMD_FC,
+		.funk 	= &ff_c
 	},
 	{
-		.name = "ff_d",
-		.id = CMD_FD,
-		.funk = &ff_d
+		.name 	= "ff_d",
+		.id 	= CMD_FD,
+		.funk 	= &ff_d
 	},
 	{
-		.name = "ff_e",
-		.id = CMD_FE,
-		.funk = &ff_e
+		.name 	= "ff_e",
+		.id 	= CMD_FE,
+		.funk 	= &ff_e
 	},
 	{
-		.name = "ff_f",
-		.id = CMD_FF,
-		.funk = &ff_f
+		.name 	= "ff_f",
+		.id 	= CMD_FF,
+		.funk 	= &ff_f
 	},
 	{
-		.name = "ff_z",
-		.id = CMD_FZ,
-		.funk = &ff_z
+		.name 	= "ff_z",
+		.id 	= CMD_FZ,
+		.funk 	= &ff_z
 	},
-	//Tests________________
+	//Tests_________________
 	{
 		.name 	= "tf_conn",
 		.id 	= CMD_CC,
@@ -243,7 +230,7 @@ void sys_mesure(div_step_uint32_t steps, uint16_t m_count, uint16_t speed)
 {
 	_delay_ms(2);
 	USART_flush();
-	uint16_t mesure = 0;
+	uint32_t mesure = 0;
 	uint16_t msg = 0;
 	uint8_t i = 0;
 	uint16_t delay_counter = 0;
@@ -306,7 +293,7 @@ void sys_filter(int n) //НЕ ЛЕЗЬ, РАБОТАЕТ!
 }
 
 void sys_dummy_filter(int n)
-{ 
+{
 	_delay_ms(1000);
 }
 
@@ -321,7 +308,8 @@ int main()
 	int i = 0;
 	int num = sys_numoffunks();
 
-	while(1) {
+	while(1)
+	{
 		cmd = USART_get();
 
 		for(i = 0; i < num; i++)

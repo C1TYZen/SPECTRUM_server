@@ -37,8 +37,6 @@ void DRIVER_backward();
 int8_t DRIVER_setdir(int8_t);
 int8_t DRIVER_setdiv(uint8_t);
 
-void DRIVER_mvf(full_step_uint16_t);
-void DRIVER_mvb(full_step_uint16_t);
 void DRIVER_moveto(div_step_uint32_t);
 
 full_step_uint16_t DRIVER_getpos();

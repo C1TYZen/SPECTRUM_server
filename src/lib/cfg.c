@@ -82,7 +82,7 @@ void cfg_set_ch(char *name, uint16_t *value)
 	}
 }
 
-void cfg_set_ui16(uint16_t *id, uint16_t *value)
+uint16_t cfg_set_ui16(uint16_t *id, uint16_t *value)
 {
 	int i = 0;
 	int num = cfg_numofvars();

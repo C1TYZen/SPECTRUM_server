@@ -2,9 +2,9 @@
 #include "DRIVER.h"
 #include "USART.h"
 
-full_step_uint16_t DRIVER_position = 0;
-int8_t 		DRIVER_dir 			= 1;
-uint8_t 	DRIVER_div 			= 1;
+div_step_uint32_t DRIVER_position = 0;
+int8_t DRIVER_dir = 1;
+uint8_t DRIVER_div = 1;
 driver_port_cfg_t cfg;
 
 /**
@@ -140,9 +140,9 @@ int8_t DRIVER_setdiv(uint8_t div)
 }
 
 //move forward
-void DRIVER_mvf(full_step_uint16_t trg)
+void __mvf(div_step_uint32_t trg)
 {
-	DRIVER_setdir(-1);
+	DRIVER_forward();
 	while(DRIVER_position > trg)
 	{
 		DRIVER_setdiv(1);
@@ -159,9 +159,9 @@ void DRIVER_mvf(full_step_uint16_t trg)
 }
 
 //move back
-void DRIVER_mvb(full_step_uint16_t trg)
+void __mvb(div_step_uint32_t trg)
 {
-	DRIVER_setdir(1);
+	DRIVER_backward();
 	while(DRIVER_position < trg)
 	{
 		DRIVER_setdiv(1);
@@ -182,11 +182,11 @@ void DRIVER_moveto(div_step_uint32_t start)
 	start *= 8;
 	if(DRIVER_position < start)
 	{
-		DRIVER_mvb(start);
+		__mvb(start);
 	}
 	else if(DRIVER_position > start)
 	{
-		DRIVER_mvf(start);
+		__mvf(start);
 	}
 	else
 	{
