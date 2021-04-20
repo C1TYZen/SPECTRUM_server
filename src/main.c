@@ -237,6 +237,9 @@ void sys_mesure(div_step_uint32_t steps, uint16_t m_count, uint16_t speed)
 
 	while(1)
 	{
+		//Waiting
+		for(delay_counter = 0; delay_counter < speed; delay_counter++)
+			_delay_ms(0.1);
 		//Mesuring
 		mesure = 0;
 		for(i = m_count; i > 0; i--)
@@ -257,10 +260,6 @@ void sys_mesure(div_step_uint32_t steps, uint16_t m_count, uint16_t speed)
 		//Walking
 		DRIVER_step();
 		steps--;
-		//_delay_ms(1.4);
-		//1.4 mc подобрано потом, кровью и индийскими сусликами аутсорсерами
-		for(delay_counter = 0; delay_counter < speed; delay_counter++)
-			_delay_ms(0.1);
 	}
 	USART_flush();
 	USART_send(CMD_MS);
