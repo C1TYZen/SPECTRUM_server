@@ -26,6 +26,7 @@ void DRIVER_init(int en, int ms1, int ms2, int ms3, int step, int dir)
 	ports_pinmod(cfg.step, PINMOD_OUT);
 	ports_pinmod(cfg.dir, PINMOD_OUT);
 
+	ports_writepin(cfg.en, 1);
 	ports_writepin(cfg.dir, 1);
 	ports_writepin(cfg.ms1, 0);
 	ports_writepin(cfg.ms2, 0);

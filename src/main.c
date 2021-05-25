@@ -130,7 +130,12 @@ void tf_pin(sys_code16_t value)
 
 void tf_test(sys_code16_t value)
 {
-	sys_filter(1);
+	while(1)
+	{
+		DRIVER_forward();
+		DRIVER_step();
+		_delay_ms(1.4);
+	}
 }
 
 /****************
