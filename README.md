@@ -1,5 +1,3 @@
-# X-ray luminescence spectrometer controller firmware
+# Прошивка-сервер для Рентгенолюминисцентного спектрометра.
 
-ArduinoADC_Server
-
-You need avr-gcc and usbBasp driver
+Необходимо установить avr-gcc и usbBasp.
